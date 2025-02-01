@@ -1,0 +1,24 @@
+import { Routes, Route } from 'react-router-dom'
+import { Box, CssBaseline } from '@mui/material'
+import Navbar from './components/Navbar'
+import Home from './pages/Home'
+import Checklist from './pages/Checklist'
+import Camera from './pages/Camera'
+
+function App() {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <CssBaseline />
+      <Navbar />
+      <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/checklist" element={<Checklist />} />
+          <Route path="/camera" element={<Camera />} />
+        </Routes>
+      </Box>
+    </Box>
+  )
+}
+
+export default App 
