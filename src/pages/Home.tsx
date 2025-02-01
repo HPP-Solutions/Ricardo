@@ -1,39 +1,67 @@
-import { Box, Typography, Button, Paper } from '@mui/material'
+import { Box, Typography, Paper, Grid, Card, CardContent, CardMedia, CardActionArea } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle as CheckIcon, PhotoCamera as CameraIcon } from '@mui/icons-material'
+
+const trucks = [
+  {
+    id: 1,
+    name: 'Caminhão Baú',
+    image: 'https://images.unsplash.com/photo-1586191582056-b5d6b911dd93?w=800&auto=format&fit=crop'
+  },
+  {
+    id: 2,
+    name: 'Carreta',
+    image: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&auto=format&fit=crop'
+  },
+  {
+    id: 3,
+    name: 'Truck',
+    image: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&auto=format&fit=crop'
+  }
+]
 
 function Home() {
   const navigate = useNavigate()
 
+  const handleTruckSelect = (truckId: number) => {
+    navigate(`/categories/${truckId}`)
+  }
+
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Bem-vindo ao SM Vistoria
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Este aplicativo permite realizar vistorias em veículos de forma simples e eficiente.
-          Você pode preencher o checklist e tirar fotos das condições do veículo.
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
-          <Button
-            variant="contained"
-            startIcon={<CheckIcon />}
-            onClick={() => navigate('/checklist')}
-            fullWidth
-          >
-            Iniciar Checklist
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<CameraIcon />}
-            onClick={() => navigate('/camera')}
-            fullWidth
-          >
-            Tirar Fotos
-          </Button>
-        </Box>
-      </Paper>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', mt: 4, px: 2 }}>
+      <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
+        Selecione o Tipo de Veículo
+      </Typography>
+      <Grid container spacing={3} justifyContent="center">
+        {trucks.map((truck) => (
+          <Grid item xs={12} sm={6} md={4} key={truck.id}>
+            <Card 
+              sx={{ 
+                height: '100%',
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'scale(1.02)',
+                  boxShadow: 6
+                }
+              }}
+            >
+              <CardActionArea onClick={() => handleTruckSelect(truck.id)} sx={{ height: '100%' }}>
+                <CardMedia
+                  component="img"
+                  height="200"
+                  image={truck.image}
+                  alt={truck.name}
+                  sx={{ objectFit: 'cover' }}
+                />
+                <CardContent>
+                  <Typography variant="h6" component="div" align="center">
+                    {truck.name}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   )
 }

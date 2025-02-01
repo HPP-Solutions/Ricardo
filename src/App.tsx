@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { Box, CssBaseline } from '@mui/material'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
+import Categories from './pages/Categories'
 import Checklist from './pages/Checklist'
 import Camera from './pages/Camera'
 
@@ -13,7 +14,8 @@ function App() {
       <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/checklist" element={<Checklist />} />
+          <Route path="/categories/:truckId" element={<Categories />} />
+          <Route path="/checklist/:truckId/:categoryId" element={<Checklist />} />
           <Route path="/camera" element={<Camera />} />
         </Routes>
       </Box>
