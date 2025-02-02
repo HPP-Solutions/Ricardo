@@ -1,11 +1,12 @@
-import { Box, Typography, Grid, Card, CardContent, CardActionArea } from '@mui/material'
+import { Box, Typography, Grid, Card, CardContent, CardActionArea, Button } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { 
   DirectionsCar as CarIcon,
   Build as MechanicalIcon,
   BatteryChargingFull as ElectricalIcon,
   AirlineSeatReclineNormal as InteriorIcon,
-  Security as SecurityIcon
+  Security as SecurityIcon,
+  ArrowForward as ArrowForwardIcon
 } from '@mui/icons-material'
 
 const categories = [
@@ -49,10 +50,14 @@ function Categories() {
     navigate(`/checklist/${truckId}/${categoryId}`)
   }
 
+  const handleAdvance = () => {
+    navigate(`/checklist-form/${truckId}`)
+  }
+
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', mt: 4, px: 2 }}>
-      <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
-        Selecione a Categoria
+      <Typography variant="h5" component="h2" gutterBottom align="center" sx={{ mb: 4 }}>
+        Selecione as Categorias para Vistoria
       </Typography>
       <Grid container spacing={3} justifyContent="center">
         {categories.map((category) => {
@@ -85,6 +90,17 @@ function Categories() {
           )
         })}
       </Grid>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <Button
+          variant="contained"
+          size="large"
+          endIcon={<ArrowForwardIcon />}
+          onClick={handleAdvance}
+          sx={{ minWidth: 200 }}
+        >
+          Avançar
+        </Button>
+      </Box>
     </Box>
   )
 }

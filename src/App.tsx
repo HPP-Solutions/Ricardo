@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Categories from './pages/Categories'
 import Checklist from './pages/Checklist'
+import ChecklistForm from './pages/ChecklistForm'
 import Camera from './pages/Camera'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/categories/:truckId" element={<Categories />} />
           <Route path="/checklist/:truckId/:categoryId" element={<Checklist />} />
+          <Route path="/checklist-form/:truckId" element={<ChecklistForm />} />
           <Route path="/camera" element={<Camera />} />
         </Routes>
       </Box>
