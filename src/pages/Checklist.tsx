@@ -28,42 +28,57 @@ interface ChecklistItem {
 }
 
 const checklistItems: Record<string, ChecklistItem[]> = {
-  exterior: [
-    { id: 1, title: 'Faróis dianteiros', status: null, observation: '', photo: null, category: 'exterior' },
-    { id: 2, title: 'Lanternas traseiras', status: null, observation: '', photo: null, category: 'exterior' },
-    { id: 3, title: 'Para-choques', status: null, observation: '', photo: null, category: 'exterior' },
-    { id: 4, title: 'Pintura', status: null, observation: '', photo: null, category: 'exterior' },
-    { id: 5, title: 'Retrovisores', status: null, observation: '', photo: null, category: 'exterior' }
+  estruturaVeiculo: [
+    { id: 1, title: 'Para Brisa sem trincas', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
+    { id: 2, title: 'Lona Carroceria em bom estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
+    { id: 3, title: 'Tela Carroceria em bom estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
+    { id: 4, title: 'Arco da Cavaqueira em bom estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
+    { id: 5, title: 'Tampa dos tanques em bom estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
+    { id: 6, title: 'Tampa da Bateria em Bom Estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
+    { id: 7, title: 'Retrovisores em bom estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
+    { id: 8, title: 'Veiculo em perfeito estado de conservação', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
+    { id: 9, title: 'Possui travessa na cavaqueira', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
   ],
-  mechanical: [
-    { id: 6, title: 'Motor', status: null, observation: '', photo: null, category: 'mechanical' },
-    { id: 7, title: 'Freios', status: null, observation: '', photo: null, category: 'mechanical' },
-    { id: 8, title: 'Suspensão', status: null, observation: '', photo: null, category: 'mechanical' },
-    { id: 9, title: 'Pneus', status: null, observation: '', photo: null, category: 'mechanical' }
+  pneusRodas: [
+    { id: 10, title: 'Pneus Cavalo em bom estado de conservação', status: null, observation: '', photo: null, category: 'pneusRodas' },
+    { id: 11, title: 'Pneus Carreta em bom estado de conservação', status: null, observation: '', photo: null, category: 'pneusRodas' },
+    { id: 12, title: 'Steps Pneus em bom estado de conservação', status: null, observation: '', photo: null, category: 'pneusRodas' },
+    { id: 13, title: 'Foi batido os p\'neus com Martelo de Borracha', status: null, observation: '', photo: null, category: 'pneusRodas' },
+    { id: 14, title: 'Freios em bom estado', status: null, observation: '', photo: null, category: 'pneusRodas' }, // Freios aqui, mas pode mover se preferir 'Sistema Mecânico'
   ],
-  electrical: [
-    { id: 10, title: 'Bateria', status: null, observation: '', photo: null, category: 'electrical' },
-    { id: 11, title: 'Sistema elétrico', status: null, observation: '', photo: null, category: 'electrical' },
-    { id: 12, title: 'Alternador', status: null, observation: '', photo: null, category: 'electrical' }
+  sistemaEletrico: [
+    { id: 15, title: 'Parte elétrica do cavalo funcionando', status: null, observation: '', photo: null, category: 'sistemaEletrico' },
+    { id: 16, title: 'Parte elétrica da carreta funcionando', status: null, observation: '', photo: null, category: 'sistemaEletrico' },
+    { id: 17, title: 'Possui luz de ré', status: null, observation: '', photo: null, category: 'sistemaEletrico' },
+    { id: 18, title: 'Buzina está funcionando', status: null, observation: '', photo: null, category: 'sistemaEletrico' },
+    { id: 19, title: 'Lampada de iluminação estão funcionando', status: null, observation: '', photo: null, category: 'sistemaEletrico' },
   ],
-  interior: [
-    { id: 13, title: 'Bancos', status: null, observation: '', photo: null, category: 'interior' },
-    { id: 14, title: 'Painel', status: null, observation: '', photo: null, category: 'interior' },
-    { id: 15, title: 'Ar condicionado', status: null, observation: '', photo: null, category: 'interior' }
+  segurancaDocumentacao: [
+    { id: 20, title: 'Documentação em dia (Licenciamento e', status: null, observation: '', photo: null, category: 'segurancaDocumentacao' },
+    { id: 21, title: 'Possui triângulo extintor, cone', status: null, observation: '', photo: null, category: 'segurancaDocumentacao' },
+    { id: 22, title: 'Veiculo possui tacógrafo funcionando', status: null, observation: '', photo: null, category: 'segurancaDocumentacao' },
+    { id: 23, title: 'Motorista possui EPI', status: null, observation: '', photo: null, category: 'segurancaDocumentacao' },
+    { id: 24, title: 'Placa do cavalo e carreta estão legíveis', status: null, observation: '', photo: null, category: 'segurancaDocumentacao' },
   ],
-  security: [
-    { id: 16, title: 'Cintos de segurança', status: null, observation: '', photo: null, category: 'security' },
-    { id: 17, title: 'Extintor', status: null, observation: '', photo: null, category: 'security' },
-    { id: 18, title: 'Triângulo', status: null, observation: '', photo: null, category: 'security' }
+  motorFluidos: [
+    { id: 25, title: 'Vazamento de óleo aparente', status: null, observation: '', photo: null, category: 'motorFluidos' },
+    { id: 26, title: 'Verificado Nível Óleo Motor', status: null, observation: '', photo: null, category: 'motorFluidos' },
+    { id: 27, title: 'Verificado Nível Água do motor', status: null, observation: '', photo: null, category: 'motorFluidos' },
+    { id: 28, title: 'Verificado Nível Combustível', status: null, observation: '', photo: null, category: 'motorFluidos' },
+    { id: 29, title: 'Verificado Nível Óleo Hidráulico Cavaqueira', status: null, observation: '', photo: null, category: 'motorFluidos' },
+  ],
+  condicoesMotorista: [
+    { id: 30, title: 'Motorista trajando calça, camisa e sapatos', status: null, observation: '', photo: null, category: 'condicoesMotorista' },
   ]
 }
 
 const categoryNames: Record<string, string> = {
-  exterior: 'Exterior',
-  mechanical: 'Mecânico',
-  electrical: 'Elétrico',
-  interior: 'Interior',
-  security: 'Segurança'
+  estruturaVeiculo: 'Estrutura do Veículo',
+  pneusRodas: 'Pneus e Rodas',
+  sistemaEletrico: 'Sistema Elétrico',
+  segurancaDocumentacao: 'Segurança e Documentação',
+  motorFluidos: 'Motor e Fluidos',
+  condicoesMotorista: 'Condições do Motorista'
 }
 
 function Checklist() {

@@ -1,45 +1,60 @@
 import { Box, Typography, Grid, Card, CardContent, CardActionArea, Button } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
-import { 
+import {
   DirectionsCar as CarIcon,
   Build as MechanicalIcon,
   BatteryChargingFull as ElectricalIcon,
   AirlineSeatReclineNormal as InteriorIcon,
   Security as SecurityIcon,
-  ArrowForward as ArrowForwardIcon
+  ArrowForward as ArrowForwardIcon,
+  ReportProblem as ReportProblemIcon,
+  CheckCircle as CheckCircleIcon,
+  WbIncandescent as WbIncandescentIcon,
+  Campaign as CampaignIcon,
+  Face as FaceIcon,
+  Construction as ConstructionIcon,
+  LocalGasStation as LocalGasStationIcon,
+  SettingsSuggest as SettingsSuggestIcon,
+  TireRepair as TireRepairIcon,
 } from '@mui/icons-material'
 
 const categories = [
   {
-    id: 'exterior',
-    name: 'Exterior',
-    icon: CarIcon,
-    color: '#1976d2'
+    id: 'estruturaVeiculo',
+    name: 'Estrutura do Veículo',
+    icon: ConstructionIcon,
+    color: '#757575'
   },
   {
-    id: 'mechanical',
-    name: 'Mecânico',
-    icon: MechanicalIcon,
-    color: '#2e7d32'
+    id: 'pneusRodas',
+    name: 'Pneus e Rodas',
+    icon: TireRepairIcon,
+    color: '#388e3c'
   },
   {
-    id: 'electrical',
-    name: 'Elétrico',
-    icon: ElectricalIcon,
-    color: '#ed6c02'
+    id: 'sistemaEletrico',
+    name: 'Sistema Elétrico',
+    icon: SettingsSuggestIcon,
+    color: '#ffb300'
   },
   {
-    id: 'interior',
-    name: 'Interior',
-    icon: InteriorIcon,
-    color: '#9c27b0'
-  },
-  {
-    id: 'security',
-    name: 'Segurança',
+    id: 'segurancaDocumentacao',
+    name: 'Segurança e Documentação',
     icon: SecurityIcon,
     color: '#d32f2f'
-  }
+  },
+  {
+    id: 'motorFluidos',
+    name: 'Motor e Fluidos',
+    icon: LocalGasStationIcon,
+    color: '#0288d1'
+  },
+  {
+    id: 'condicoesMotorista',
+    name: 'Condições do Motorista',
+    icon: FaceIcon,
+    color: '#5d4037'
+  },
 ]
 
 function Categories() {
