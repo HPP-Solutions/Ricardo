@@ -1,53 +1,70 @@
-import { Box, Typography, Card, CardContent, CardMedia, CardActionArea } from '@mui/material'
+import { Box, Typography, Card, CardContent, CardMedia, CardActionArea, Button, Grid, Paper, Icon } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-
-const truck = {
-  id: 1,
-  name: 'Iniciar Vistoria',
-  image: 'public/caminhao.jpeg'
-}
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
 function Home() {
   const navigate = useNavigate()
 
-  const handleTruckSelect = () => {
-    navigate(`/categories/${truck.id}`)
+  const handleStartInspection = () => {
+    // Aqui você pode redirecionar para a página de seleção de tipo de vistoria ou iniciar diretamente
+    navigate('/categories/1'); // Assumindo que '1' é o ID para 'Iniciar Vistoria'
+  }
+
+  const handleViewInspections = () => {
+    // Redirecionar para a página de listagem de vistorias
+    navigate('/inspections'); // Crie esta rota se ainda não existir
   }
 
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, px: 2 }}>
-      <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
-        SM Vistoria
+    <Box sx={{ mx: 'auto', mt: 4, px: 2, maxWidth: 'md' }}>
+      <Typography variant="h4" component="h1" align="center" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+        Painel de Vistorias SM
       </Typography>
-      <Card 
-        sx={{ 
-          transition: 'transform 0.2s',
-          '&:hover': {
-            transform: 'scale(1.02)',
-            boxShadow: 6
-          }
-        }}
-      >
-        <CardActionArea onClick={handleTruckSelect}>
-          <CardMedia
-            component="img"
-            height="400"
-            image={truck.image}
-            alt="Caminhão"
-            sx={{ 
-              objectFit: 'cover',
-              width: '100%'
-            }}
-          />
-          <CardContent>
-            <Typography variant="h5" component="div" align="center">
-              {truck.name}
+
+      <Grid container spacing={3} mt={2}>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3, textAlign: 'center' }}>
+            <Icon component={DirectionsCarIcon} sx={{ fontSize: 60, color: 'secondary.main', mb: 1 }} />
+            <Typography variant="h6" gutterBottom>
+              Iniciar Nova Vistoria
             </Typography>
-          </CardContent>
-        </CardActionArea>
-      </Card>
+            <Typography color="textSecondary">
+              Comece uma nova inspeção de veículo.
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={handleStartInspection}
+            >
+              Iniciar Vistoria
+            </Button>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3, textAlign: 'center' }}>
+            <Icon component={ListAltIcon} sx={{ fontSize: 60, color: 'primary', mb: 1 }} />
+            <Typography variant="h6" gutterBottom>
+              Ver Vistorias Existentes
+            </Typography>
+            <Typography color="textSecondary">
+              Visualize e gerencie as vistorias já realizadas.
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={handleViewInspections}
+            >
+              Ver Vistorias
+            </Button>
+          </Paper>
+        </Grid>
+      </Grid>
     </Box>
-  )
+  );
 }
 
-export default Home 
+export default Home; 
