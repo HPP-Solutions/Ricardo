@@ -1,0 +1,97 @@
+
+-- Conecte-se ao banco de dados checklist_db manualmente antes de executar o restante do script
+
+-- Tabela: trucks (veículos inspecionados)
+CREATE TABLE trucks (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,  -- Nome, placa ou outra identificação do veículo
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela: categories (categorias da vistoria)
+CREATE TABLE categories (
+    id VARCHAR(50) PRIMARY KEY,    -- IDs como 'estruturaVeiculo', 'pneusRodas', etc.
+    name VARCHAR(100) NOT NULL,    -- Nome exibido da categoria
+    icon VARCHAR(100),             -- Nome do ícone ou caminho (opcional)
+    color VARCHAR(20)              -- Cor associada à categoria, ex: '#757575'
+);
+
+-- Tabela: checklist_templates (itens padrões do checklist para cada categoria)
+CREATE TABLE checklist_templates (
+    id INT PRIMARY KEY,            -- Identificador único do item (conforme definido no front-end)
+    title VARCHAR(255) NOT NULL,   -- Descrição do item (ex: 'Para Brisa sem trincas')
+    category_id VARCHAR(50),       -- Relaciona o item à categoria correspondente
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+-- Tabela: inspections (registros de vistorias realizadas)
+CREATE TABLE inspections (
+    id SERIAL PRIMARY KEY,
+    truck_id INT,                  -- Relação com o veículo inspecionado
+    inspection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Data e hora da vistoria
+    FOREIGN KEY (truck_id) REFERENCES trucks(id)
+);
+
+-- Tabela: inspection_items (respostas para cada item de checklist em uma vistoria)
+CREATE TABLE inspection_items (
+    id SERIAL PRIMARY KEY,
+    inspection_id INT,             -- Relação com a vistoria (inspection)
+    checklist_template_id INT,     -- Relação com o item padrão do checklist
+    status VARCHAR(10),            -- 'valid' ou 'invalid' (NULL para 'não avaliado')
+    observation TEXT,              -- Observações realizadas no item
+    photo VARCHAR(255),            -- Caminho ou URL da foto associada (pode ser NULL)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (inspection_id) REFERENCES inspections(id),
+    FOREIGN KEY (checklist_template_id) REFERENCES checklist_templates(id)
+);
+
+-- Tabela: checklist_forms (formulários de checklist)
+CREATE TABLE checklist_forms (
+    id SERIAL PRIMARY KEY,
+    truck_id INT,                  -- Relação com o veículo inspecionado
+    form_data JSONB,               -- Armazena os dados do formulário em formato JSON
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (truck_id) REFERENCES trucks(id)
+);
+
+-- Inserção das categorias padrão
+INSERT INTO categories (id, name, icon, color) VALUES
+('estruturaVeiculo', 'Estrutura do Veículo', 'ConstructionIcon', '#757575'),
+('pneusRodas', 'Pneus e Rodas', 'TireRepairIcon', '#388e3c'),
+('sistemaEletrico', 'Sistema Elétrico', 'SettingsSuggestIcon', '#ffb300'),
+('segurancaDocumentacao', 'Segurança e Documentação', 'SecurityIcon', '#d32f2f'),
+('motorFluidos', 'Motor e Fluidos', 'LocalGasStationIcon', '#0288d1'),
+('condicoesMotorista', 'Condições do Motorista', 'FaceIcon', '#5d4037');
+
+-- Inserção dos itens padrão do checklist
+INSERT INTO checklist_templates (id, title, category_id) VALUES
+(1, 'Para Brisa sem trincas', 'estruturaVeiculo'),
+(2, 'Lona Carroceria em bom estado', 'estruturaVeiculo'),
+(3, 'Tela Carroceria em bom estado', 'estruturaVeiculo'),
+(4, 'Arco da Cavaqueira em bom estado', 'estruturaVeiculo'),
+(5, 'Tampa dos tanques em bom estado', 'estruturaVeiculo'),
+(6, 'Tampa da Bateria em Bom Estado', 'estruturaVeiculo'),
+(7, 'Retrovisores em bom estado', 'estruturaVeiculo'),
+(8, 'Veiculo em perfeito estado de conservação', 'estruturaVeiculo'),
+(9, 'Possui travessa na cavaqueira', 'estruturaVeiculo'),
+(10, 'Pneus Cavalo em bom estado de conservação', 'pneusRodas'),
+(11, 'Pneus Carreta em bom estado de conservação', 'pneusRodas'),
+(12, 'Steps Pneus em bom estado de conservação', 'pneusRodas'),
+(13, 'Foi batido os pneus com Martelo de Borracha', 'pneusRodas'),
+(14, 'Freios em bom estado', 'pneusRodas'),
+(15, 'Parte elétrica do cavalo funcionando', 'sistemaEletrico'),
+(16, 'Parte elétrica da carreta funcionando', 'sistemaEletrico'),
+(17, 'Possui luz de ré', 'sistemaEletrico'),
+(18, 'Buzina está funcionando', 'sistemaEletrico'),
+(19, 'Lampada de iluminação estão funcionando', 'sistemaEletrico'),
+(20, 'Documentação em dia (Licenciamento e', 'segurancaDocumentacao'),
+(21, 'Possui triângulo extintor, cone', 'segurancaDocumentacao'),
+(22, 'Veiculo possui tacógrafo funcionando', 'segurancaDocumentacao'),
+(23, 'Motorista possui EPI', 'segurancaDocumentacao'),
+(24, 'Placa do cavalo e carreta estão legíveis', 'segurancaDocumentacao'),
+(25, 'Vazamento de óleo aparente', 'motorFluidos'),
+(26, 'Verificado Nível Óleo Motor', 'motorFluidos'),
+(27, 'Verificado Nível Água do motor', 'motorFluidos'),
+(28, 'Verificado Nível Combustível', 'motorFluidos'),
+(29, 'Verificado Nível Óleo Hidráulico Cavaqueira', 'motorFluidos'),
+(30, 'Motorista trajando calça, camisa e sapatos', 'condicoesMotorista');

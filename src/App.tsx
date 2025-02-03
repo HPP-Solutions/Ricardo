@@ -5,7 +5,9 @@ import Home from './pages/Home'
 import Categories from './pages/Categories'
 import Checklist from './pages/Checklist'
 import ChecklistForm from './pages/ChecklistForm'
+
 import Camera from './pages/Camera'
+
 
 function App() {
   return (
