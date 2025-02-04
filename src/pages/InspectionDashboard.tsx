@@ -19,6 +19,10 @@ import {
   ListItemText,
   Divider,
   Button,
+  TextField,
+  InputAdornment,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   BarChart,
@@ -39,9 +43,11 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
+import SearchIcon from '@mui/icons-material/Search';
 import { format } from 'date-fns';
 import { ptBR as dateFnsPtBR } from 'date-fns/locale';
 import supabase from '../helper/supabaseClient';
+import { SelectChangeEvent } from '@mui/material/Select';
 
 // Cores para os gráficos
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -55,14 +61,17 @@ const InspectionDashboard = () => {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [stats, setStats] = useState({
     totalInspections: 0,
-    inProgress: 0,
-    completed: 0,
+    aprovadas: 0,
+    reprovadas: 0,
+    emAndamento: 0,
     approvalRate: 0,
   });
   const [categoryStats, setCategoryStats] = useState<any[]>([]);
   const [timelineData, setTimelineData] = useState<any[]>([]);
   const [recentInspections, setRecentInspections] = useState<any[]>([]);
   const [criticalAlerts, setCriticalAlerts] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const loadDashboardData = async () => {
     try {
@@ -90,17 +99,17 @@ const InspectionDashboard = () => {
 
       // Calcular estatísticas
       const totalInspections = inspections?.length || 0;
-      const inProgress = inspections?.filter(i => i.status === 'em_andamento').length || 0;
-      const completed = inspections?.filter(i => i.status === 'concluida').length || 0;
-
-      const validItems = inspectionItems?.filter(item => item.status === 'valid').length || 0;
-      const totalItems = inspectionItems?.length || 0;
-      const approvalRate = totalItems > 0 ? (validItems / totalItems) * 100 : 0;
+      const aprovadas = inspections?.filter(i => i.status === 'aprovado').length || 0;
+      const reprovadas = inspections?.filter(i => i.status === 'reprovado').length || 0;
+      const emAndamento = inspections?.filter(i => i.status === 'em_andamento').length || 0;
+      const approvalRate = (aprovadas + reprovadas) > 0 ? 
+        (aprovadas / (aprovadas + reprovadas)) * 100 : 0;
 
       setStats({
         totalInspections,
-        inProgress,
-        completed,
+        aprovadas,
+        reprovadas,
+        emAndamento,
         approvalRate,
       });
 
@@ -147,17 +156,16 @@ const InspectionDashboard = () => {
       }
 
       // Buscar inspeções recentes
-      const { data: recent } = await supabase
+      const { data: allInspections } = await supabase
         .from('inspections')
         .select(`
           *,
           trucks (nome)
         `)
-        .order('inspection_date', { ascending: false })
-        .limit(5);
+        .order('inspection_date', { ascending: false });
 
-      if (recent) {
-        setRecentInspections(recent);
+      if (allInspections) {
+        setRecentInspections(allInspections);
       }
 
       // Buscar alertas críticos (itens inválidos em categorias importantes)
@@ -187,7 +195,7 @@ const InspectionDashboard = () => {
     setSelectedInspection(inspection);
     setLoadingDetails(true);
     try {
-      // Buscar todos os itens desta inspeção
+      // Buscar todos os itens com fotos
       const { data: items, error: itemsError } = await supabase
         .from('inspection_items')
         .select(`
@@ -199,9 +207,16 @@ const InspectionDashboard = () => {
         .eq('inspection_id', inspection.id)
         .order('category');
 
+      // Buscar assinatura
+      const { data: signature } = await supabase
+        .from('signatures')
+        .select('signature_data')
+        .eq('inspection_id', inspection.id)
+        .single();
+
       if (itemsError) throw itemsError;
 
-      // Agrupar itens por categoria
+      // Agrupar itens por categoria e incluir fotos
       const groupedItems = items?.reduce((acc: any, item) => {
         const categoryName = item.categories?.name || 'Sem categoria';
         if (!acc[categoryName]) {
@@ -211,7 +226,14 @@ const InspectionDashboard = () => {
         return acc;
       }, {});
 
-      setInspectionDetails(groupedItems);
+      setInspectionDetails({
+        items: groupedItems,
+        signature: signature?.signature_data,
+        referenceCode: inspection.reference_code,
+        status: inspection.status,
+        inspectionDate: inspection.inspection_date
+      });
+
     } catch (err) {
       console.error('Erro ao carregar detalhes:', err);
     } finally {
@@ -222,6 +244,10 @@ const InspectionDashboard = () => {
   const handleCloseDetails = () => {
     setSelectedInspection(null);
     setInspectionDetails(null);
+  };
+
+  const handleFilterChange = (event: SelectChangeEvent) => {
+    setStatusFilter(event.target.value as string);
   };
 
   useEffect(() => {
@@ -289,7 +315,7 @@ const InspectionDashboard = () => {
                 Em Andamento
               </Typography>
               <Typography variant="h4" color="warning.main">
-                {stats.inProgress}
+                {stats.emAndamento}
               </Typography>
             </CardContent>
           </Card>
@@ -298,10 +324,10 @@ const InspectionDashboard = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                Concluídas
+                Aprovadas
               </Typography>
               <Typography variant="h4" color="success.main">
-                {stats.completed}
+                {stats.aprovadas}
               </Typography>
             </CardContent>
           </Card>
@@ -310,10 +336,10 @@ const InspectionDashboard = () => {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                Taxa de Aprovação
+                Reprovadas
               </Typography>
-              <Typography variant="h4" color="info.main">
-                {stats.approvalRate.toFixed(1)}%
+              <Typography variant="h4" color="error.main">
+                {stats.reprovadas}
               </Typography>
             </CardContent>
           </Card>
@@ -322,7 +348,7 @@ const InspectionDashboard = () => {
 
       {/* Gráficos */}
       <Grid container spacing={3} mb={4}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={8}>
           <Paper sx={{ p: 2, height: '400px' }}>
             <Typography variant="h6" gutterBottom>
               Problemas por Categoria
@@ -340,21 +366,33 @@ const InspectionDashboard = () => {
             </ResponsiveContainer>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 2, height: '400px' }}>
             <Typography variant="h6" gutterBottom>
-              Vistorias ao Longo do Tempo
+              Status das Vistorias
             </Typography>
             <ResponsiveContainer width="100%" height="90%">
-              <LineChart data={timelineData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <RechartsTooltip />
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Aprovadas', value: stats.aprovadas },
+                    { name: 'Reprovadas', value: stats.reprovadas },
+                    { name: 'Em Andamento', value: stats.emAndamento }
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {['#00C49F', '#FF8042', '#FFBB28'].map((color, index) => (
+                    <Cell key={index} fill={color} />
+                  ))}
+                </Pie>
                 <Legend />
-                <Line type="monotone" dataKey="total" stroke="#8884d8" name="Total" />
-                <Line type="monotone" dataKey="concluidas" stroke="#82ca9d" name="Concluídas" />
-              </LineChart>
+                <RechartsTooltip />
+              </PieChart>
             </ResponsiveContainer>
           </Paper>
         </Grid>
@@ -385,40 +423,81 @@ const InspectionDashboard = () => {
         </Grid>
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Inspeções Recentes
-            </Typography>
-            {recentInspections.map((inspection, index) => (
-              <Box 
-                key={index} 
-                sx={{ 
-                  mb: 2, 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  '&:hover': {
-                    bgcolor: 'action.hover',
-                    borderRadius: 1
-                  },
-                  p: 1
-                }}
-                onClick={() => handleInspectionClick(inspection)}
-              >
-                {inspection.status === 'concluida' ? (
-                  <CheckCircleIcon color="success" sx={{ mr: 1 }} />
-                ) : (
-                  <PendingIcon color="warning" sx={{ mr: 1 }} />
-                )}
-                <Box>
-                  <Typography variant="body1">
-                    {inspection.trucks?.nome}
-                  </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography variant="h6" gutterBottom>
+                Todas as Inspeções
+              </Typography>
+              <Box display="flex" gap={2}>
+                <TextField
+                  variant="outlined"
+                  size="small"
+                  placeholder="Pesquisar veículo..."
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <Select
+                  value={statusFilter}
+                  onChange={handleFilterChange}
+                  size="small"
+                  sx={{ minWidth: 120 }}
+                >
+                  <MenuItem value="all">Todas</MenuItem>
+                  <MenuItem value="em_andamento">Em Andamento</MenuItem>
+                  <MenuItem value="aprovado">Aprovadas</MenuItem>
+                  <MenuItem value="reprovado">Reprovadas</MenuItem>
+                </Select>
+              </Box>
+            </Box>
+            {recentInspections
+              .filter(inspection => 
+                inspection.trucks?.nome?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                (statusFilter === 'all' || inspection.status === statusFilter)
+              )
+              .map((inspection, index) => (
+                <Box 
+                  key={index} 
+                  sx={{ 
+                    mb: 2,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    '&:hover': { bgcolor: 'action.hover', borderRadius: 1 },
+                    p: 1
+                  }}
+                  onClick={() => handleInspectionClick(inspection)}
+                >
+                  <Box display="flex" alignItems="center" gap={1}>
+                    {inspection.status === 'aprovado' ? (
+                      <CheckCircleIcon color="success" />
+                    ) : inspection.status === 'reprovado' ? (
+                      <WarningIcon color="error" />
+                    ) : (
+                      <PendingIcon color="warning" />
+                    )}
+                    <Box>
+                      <Typography variant="body1">
+                        {inspection.trucks?.nome}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        {inspection.reference_code}
+                      </Typography>
+                    </Box>
+                  </Box>
                   <Typography variant="body2" color="textSecondary">
-                    {format(new Date(inspection.inspection_date), "dd 'de' MMMM 'às' HH:mm", { locale: dateFnsPtBR })}
+                    {inspection.inspection_date && 
+                      format(new Date(inspection.inspection_date), "dd/MM/yy HH:mm")
+                    }
                   </Typography>
                 </Box>
-              </Box>
-            ))}
+              ))}
           </Paper>
         </Grid>
       </Grid>
@@ -432,8 +511,10 @@ const InspectionDashboard = () => {
       >
         <DialogTitle>
           <Box display="flex" alignItems="center" gap={1}>
-            {selectedInspection?.status === 'concluida' ? (
+            {selectedInspection?.status === 'aprovado' ? (
               <CheckCircleIcon color="success" />
+            ) : selectedInspection?.status === 'reprovado' ? (
+              <WarningIcon color="error" />
             ) : (
               <PendingIcon color="warning" />
             )}
@@ -442,11 +523,13 @@ const InspectionDashboard = () => {
             </Typography>
           </Box>
           <Typography variant="body2" color="textSecondary">
-            {selectedInspection && format(
-              new Date(selectedInspection.inspection_date),
-              "dd 'de' MMMM 'de' yyyy 'às' HH:mm",
-              { locale: dateFnsPtBR }
-            )}
+            {selectedInspection?.inspection_date && 
+              format(
+                new Date(selectedInspection.inspection_date),
+                "dd 'de' MMMM 'de' yyyy 'às' HH:mm",
+                { locale: dateFnsPtBR }
+              )
+            }
           </Typography>
         </DialogTitle>
         <DialogContent dividers>
@@ -456,7 +539,21 @@ const InspectionDashboard = () => {
             </Box>
           ) : (
             <>
-              {inspectionDetails && Object.entries(inspectionDetails).map(([category, items]: [string, any]) => (
+              <Box mb={4}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Código da Vistoria: {inspectionDetails?.referenceCode}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Status: {inspectionDetails?.status}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Data: {inspectionDetails?.inspectionDate && 
+                    format(new Date(inspectionDetails.inspectionDate), "dd/MM/yyyy HH:mm")
+                  }
+                </Typography>
+              </Box>
+
+              {inspectionDetails?.items && Object.entries(inspectionDetails.items).map(([category, items]: [string, any]) => (
                 <Box key={category} mb={3}>
                   <Typography variant="h6" color="primary" gutterBottom>
                     {category}
@@ -476,7 +573,27 @@ const InspectionDashboard = () => {
                                 <Typography>{item.title}</Typography>
                               </Box>
                             }
-                            secondary={item.observation || 'Sem observações'}
+                            secondary={
+                              <Box>
+                                {item.observation && <Typography variant="body2">{item.observation}</Typography>}
+                                {item.photo && (
+                                  <Box mt={1}>
+                                    <Typography variant="caption">Foto:</Typography>
+                                    <img 
+                                      src={item.photo} 
+                                      alt={`Foto do item ${item.title}`}
+                                      style={{ 
+                                        maxWidth: '200px', 
+                                        maxHeight: '150px',
+                                        display: 'block',
+                                        marginTop: '8px',
+                                        borderRadius: '4px'
+                                      }}
+                                    />
+                                  </Box>
+                                )}
+                              </Box>
+                            }
                           />
                         </ListItem>
                         {index < items.length - 1 && <Divider />}
@@ -485,15 +602,31 @@ const InspectionDashboard = () => {
                   </List>
                 </Box>
               ))}
-              {selectedInspection?.status === 'em_andamento' && (
-                <Box mt={2} display="flex" justifyContent="flex-end">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => navigate(`/checklist-form/${selectedInspection.truck_id}`)}
+
+              {inspectionDetails?.signature && (
+                <Box mt={4}>
+                  <Typography variant="h6" gutterBottom>
+                    Assinatura do Responsável
+                  </Typography>
+                  <Box 
+                    sx={{ 
+                      bgcolor: 'white', 
+                      p: 2, 
+                      borderRadius: 1,
+                      boxShadow: 1,
+                      maxWidth: '300px'
+                    }}
                   >
-                    Continuar Vistoria
-                  </Button>
+                    <img 
+                      src={inspectionDetails.signature} 
+                      alt="Assinatura digital"
+                      style={{ 
+                        width: '100%',
+                        height: 'auto',
+                        filter: 'invert(1)' // Para assinaturas em preto
+                      }}
+                    />
+                  </Box>
                 </Box>
               )}
             </>

@@ -29,6 +29,7 @@ CREATE TABLE inspections (
     truck_id INT NOT NULL,         -- Relação com o veículo inspecionado
     inspection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Data e hora da vistoria
     status VARCHAR(20) DEFAULT 'em_andamento',  -- Status da vistoria: em_andamento, concluida, cancelada
+    reference_code VARCHAR(50),
     FOREIGN KEY (truck_id) REFERENCES trucks(id) ON DELETE CASCADE
 );
 
@@ -112,3 +113,6 @@ INSERT INTO checklist_templates (id, title, category_id) VALUES
 (28, 'Verificado Nível Combustível', 'motorFluidos'),
 (29, 'Verificado Nível Óleo Hidráulico Cavaqueira', 'motorFluidos'),
 (30, 'Motorista trajando calça, camisa e sapatos', 'condicoesMotorista');
+
+-- Adicione na tabela inspections:
+ALTER TABLE inspections ADD COLUMN reference_code VARCHAR(50);
