@@ -61,10 +61,12 @@ const InspectionDashboard = () => {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [stats, setStats] = useState({
     totalInspections: 0,
-    aprovadas: 0,
-    reprovadas: 0,
+    conformes: 0,
+    naoConformes: 0,
+    parcialmenteConformes: 0,
+    pendentes: 0,
     emAndamento: 0,
-    approvalRate: 0,
+    conformidadeRate: 0,
   });
   const [categoryStats, setCategoryStats] = useState<any[]>([]);
   const [timelineData, setTimelineData] = useState<any[]>([]);
@@ -100,18 +102,24 @@ const InspectionDashboard = () => {
 
       // Calcular estatísticas
       const totalInspections = inspections?.length || 0;
-      const aprovadas = inspections?.filter(i => i.status === 'aprovado').length || 0;
-      const reprovadas = inspections?.filter(i => i.status === 'reprovado').length || 0;
+      const conformes = inspections?.filter(i => i.status === 'conforme').length || 0;
+      const naoConformes = inspections?.filter(i => i.status === 'nao_conforme').length || 0;
+      const parcialmenteConformes = inspections?.filter(i => i.status === 'parcialmente_conforme').length || 0;
+      const pendentes = inspections?.filter(i => i.status === 'pendente').length || 0;
       const emAndamento = inspections?.filter(i => i.status === 'em_andamento').length || 0;
-      const approvalRate = (aprovadas + reprovadas) > 0 ? 
-        (aprovadas / (aprovadas + reprovadas)) * 100 : 0;
+      
+      // Taxa de conformidade (considerando parcialmente conformes como meio ponto)
+      const conformidadeRate = totalInspections > 0 ? 
+        ((conformes + (parcialmenteConformes * 0.5)) / totalInspections) * 100 : 0;
 
       setStats({
         totalInspections,
-        aprovadas,
-        reprovadas,
+        conformes,
+        naoConformes,
+        parcialmenteConformes,
+        pendentes,
         emAndamento,
-        approvalRate,
+        conformidadeRate,
       });
 
       // Processar dados para gráficos
@@ -306,7 +314,7 @@ const InspectionDashboard = () => {
 
       {/* Cards de Estatísticas */}
       <Grid container spacing={3} mb={4}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={2}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
@@ -318,38 +326,62 @@ const InspectionDashboard = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Conformes
+              </Typography>
+              <Typography variant="h4" color="success.main">
+                {stats.conformes}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Parcialmente Conformes
+              </Typography>
+              <Typography variant="h4" color="warning.main">
+                {stats.parcialmenteConformes}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Não Conformes
+              </Typography>
+              <Typography variant="h4" color="error.main">
+                {stats.naoConformes}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={2}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
                 Em Andamento
               </Typography>
-              <Typography variant="h4" color="warning.main">
+              <Typography variant="h4" color="info.main">
                 {stats.emAndamento}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={2}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                Aprovadas
+                Pendentes
               </Typography>
-              <Typography variant="h4" color="success.main">
-                {stats.aprovadas}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Reprovadas
-              </Typography>
-              <Typography variant="h4" color="error.main">
-                {stats.reprovadas}
+              <Typography variant="h4" color="text.secondary">
+                {stats.pendentes}
               </Typography>
             </CardContent>
           </Card>
@@ -385,9 +417,11 @@ const InspectionDashboard = () => {
               <PieChart>
                 <Pie
                   data={[
-                    { name: 'Aprovadas', value: stats.aprovadas },
-                    { name: 'Reprovadas', value: stats.reprovadas },
-                    { name: 'Em Andamento', value: stats.emAndamento }
+                    { name: 'Conformes', value: stats.conformes },
+                    { name: 'Parcialmente Conformes', value: stats.parcialmenteConformes },
+                    { name: 'Não Conformes', value: stats.naoConformes },
+                    { name: 'Em Andamento', value: stats.emAndamento },
+                    { name: 'Pendentes', value: stats.pendentes }
                   ]}
                   cx="50%"
                   cy="50%"
@@ -396,7 +430,7 @@ const InspectionDashboard = () => {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {['#00C49F', '#FF8042', '#FFBB28'].map((color, index) => (
+                  {['#00C49F', '#FFBB28', '#FF8042', '#0088FE', '#666666'].map((color, index) => (
                     <Cell key={index} fill={color} />
                   ))}
                 </Pie>
@@ -459,9 +493,11 @@ const InspectionDashboard = () => {
                   sx={{ minWidth: 120 }}
                 >
                   <MenuItem value="all">Todas</MenuItem>
+                  <MenuItem value="conforme">Conformes</MenuItem>
+                  <MenuItem value="parcialmente_conforme">Parcialmente Conformes</MenuItem>
+                  <MenuItem value="nao_conforme">Não Conformes</MenuItem>
                   <MenuItem value="em_andamento">Em Andamento</MenuItem>
-                  <MenuItem value="aprovado">Aprovadas</MenuItem>
-                  <MenuItem value="reprovado">Reprovadas</MenuItem>
+                  <MenuItem value="pendente">Pendentes</MenuItem>
                 </Select>
               </Box>
             </Box>
@@ -485,12 +521,16 @@ const InspectionDashboard = () => {
                   onClick={() => handleInspectionClick(inspection)}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
-                    {inspection.status === 'aprovado' ? (
+                    {inspection.status === 'conforme' ? (
                       <CheckCircleIcon color="success" />
-                    ) : inspection.status === 'reprovado' ? (
+                    ) : inspection.status === 'nao_conforme' ? (
                       <WarningIcon color="error" />
+                    ) : inspection.status === 'parcialmente_conforme' ? (
+                      <WarningIcon color="warning" />
+                    ) : inspection.status === 'em_andamento' ? (
+                      <PendingIcon color="info" />
                     ) : (
-                      <PendingIcon color="warning" />
+                      <PendingIcon color="disabled" />
                     )}
                     <Box>
                       <Typography variant="body1">
@@ -521,12 +561,16 @@ const InspectionDashboard = () => {
       >
         <DialogTitle>
           <Box display="flex" alignItems="center" gap={1}>
-            {selectedInspection?.status === 'aprovado' ? (
+            {selectedInspection?.status === 'conforme' ? (
               <CheckCircleIcon color="success" />
-            ) : selectedInspection?.status === 'reprovado' ? (
+            ) : selectedInspection?.status === 'nao_conforme' ? (
               <WarningIcon color="error" />
+            ) : selectedInspection?.status === 'parcialmente_conforme' ? (
+              <WarningIcon color="warning" />
+            ) : selectedInspection?.status === 'em_andamento' ? (
+              <PendingIcon color="info" />
             ) : (
-              <PendingIcon color="warning" />
+              <PendingIcon color="disabled" />
             )}
             <Typography variant="h6">
               Vistoria - {selectedInspection?.trucks?.nome}

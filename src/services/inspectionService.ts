@@ -51,7 +51,7 @@ export const inspectionService = {
         form_data: {
           inspection_id: inspection.id,
           data_vistoria: new Date().toISOString(),
-          status: 'concluido',
+          status: 'em_andamento',
           veiculo: {
             placaCavalo: data.formData.placaCavalo.trim(),
             placaCarreta: data.formData.placaCarreta.trim(),
@@ -128,10 +128,31 @@ export const inspectionService = {
 
       if (signatureError) throw signatureError
 
-      // 5. Atualiza o status da inspeção para concluído
+      // 5. Determina o status final da vistoria baseado nos itens
+      const allItems = Object.values(data.checklistItems).flat()
+      const totalItems = allItems.length
+      const invalidItems = allItems.filter(item => item.status === 'invalid').length
+      const validItems = allItems.filter(item => item.status === 'valid').length
+      const nonEvaluatedItems = totalItems - (invalidItems + validItems)
+
+      let finalStatus = 'pendente'
+
+      if (nonEvaluatedItems === 0) {
+        if (invalidItems === 0) {
+          finalStatus = 'conforme'
+        } else if (invalidItems <= Math.floor(totalItems * 0.2)) { // Se até 20% dos itens são não conformes
+          finalStatus = 'parcialmente_conforme'
+        } else {
+          finalStatus = 'nao_conforme'
+        }
+      } else {
+        finalStatus = 'em_andamento'
+      }
+
+      // Atualiza o status da inspeção
       const { error: updateInspectionError } = await supabase
         .from('inspections')
-        .update({ status: 'concluida' })
+        .update({ status: finalStatus })
         .eq('id', inspection.id)
 
       if (updateInspectionError) throw updateInspectionError

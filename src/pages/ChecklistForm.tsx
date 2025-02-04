@@ -72,8 +72,21 @@ function ChecklistForm() {
 
       if (truckError) throw truckError
 
+      // Cria uma nova inspeção com status pendente
+      const { data: inspection, error: inspectionError } = await supabase
+        .from('inspections')
+        .insert([{
+          truck_id: truck.id,
+          status: 'pendente',
+          inspection_date: new Date().toISOString()
+        }])
+        .select()
+        .single()
+
+      if (inspectionError) throw inspectionError
+
       // Salva os dados atuais antes de navegar
-      localStorage.setItem(`checklistForm_${truckId}`, JSON.stringify(formData))
+      localStorage.setItem(`checklistForm_${truck.id}`, JSON.stringify(formData))
       navigate(`/categories/${truck.id}`)
     } catch (error) {
       console.error('Erro ao criar registro do caminhão:', error)

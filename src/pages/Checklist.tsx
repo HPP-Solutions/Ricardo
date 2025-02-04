@@ -206,6 +206,13 @@ function Checklist() {
             {categoryNames[categoryId]} - Checklist
           </Typography>
         </Box>
+
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="body2" color="textSecondary">
+            Avalie cada item como "Conforme" ou "Não Conforme". Itens não avaliados serão considerados pendentes.
+          </Typography>
+        </Box>
+
         <List>
           {items.map((item, index) => (
             <Box key={item.id}>
@@ -216,7 +223,7 @@ function Checklist() {
                     primary={item.title}
                   />
                   <Chip
-                    label={item.status === 'valid' ? 'Válido' : item.status === 'invalid' ? 'Inválido' : 'Não avaliado'}
+                    label={item.status === 'valid' ? 'Conforme' : item.status === 'invalid' ? 'Não Conforme' : 'Pendente'}
                     color={item.status === 'valid' ? 'success' : item.status === 'invalid' ? 'error' : 'default'}
                     size="small"
                   />
@@ -227,20 +234,38 @@ function Checklist() {
                   onChange={(e) => handleStatusChange(item.id, e.target.value as 'valid' | 'invalid')}
                   sx={{ mb: 2 }}
                 >
-                  <FormControlLabel value="valid" control={<Radio />} label="Válido" />
-                  <FormControlLabel value="invalid" control={<Radio />} label="Inválido" />
+                  <FormControlLabel value="valid" control={<Radio />} label="Conforme" />
+                  <FormControlLabel value="invalid" control={<Radio />} label="Não Conforme" />
                 </RadioGroup>
-                <TextField
-                  fullWidth
-                  label="Observações"
-                  variant="outlined"
-                  value={item.observation}
-                  onChange={(e) => handleObservationChange(item.id, e.target.value)}
-                  size="small"
-                  multiline
-                  rows={2}
-                  sx={{ mb: 2 }}
-                />
+                {item.status === 'invalid' && (
+                  <TextField
+                    fullWidth
+                    label="Observações (obrigatório para itens não conformes)"
+                    variant="outlined"
+                    value={item.observation}
+                    onChange={(e) => handleObservationChange(item.id, e.target.value)}
+                    size="small"
+                    multiline
+                    rows={2}
+                    required
+                    error={!item.observation}
+                    helperText={!item.observation ? "Por favor, descreva o problema encontrado" : ""}
+                    sx={{ mb: 2 }}
+                  />
+                )}
+                {item.status === 'valid' && (
+                  <TextField
+                    fullWidth
+                    label="Observações (opcional)"
+                    variant="outlined"
+                    value={item.observation}
+                    onChange={(e) => handleObservationChange(item.id, e.target.value)}
+                    size="small"
+                    multiline
+                    rows={2}
+                    sx={{ mb: 2 }}
+                  />
+                )}
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                   <Button
                     variant="outlined"

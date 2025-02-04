@@ -28,7 +28,7 @@ CREATE TABLE inspections (
     id SERIAL PRIMARY KEY,
     truck_id INT NOT NULL,         -- Relação com o veículo inspecionado
     inspection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Data e hora da vistoria
-    status VARCHAR(20) DEFAULT 'em_andamento',  -- Status da vistoria: em_andamento, concluida, cancelada
+    status VARCHAR(30) DEFAULT 'pendente',  -- Status da vistoria: pendente, em_andamento, conforme, nao_conforme, parcialmente_conforme
     reference_code VARCHAR(50),
     FOREIGN KEY (truck_id) REFERENCES trucks(id) ON DELETE CASCADE
 );
@@ -131,3 +131,12 @@ INSERT INTO checklist_templates (id, title, category_id) VALUES
 
 -- Adicione na tabela inspections:
 ALTER TABLE inspections ADD COLUMN reference_code VARCHAR(50);
+
+-- Atualizar registros existentes se necessário
+UPDATE inspections 
+SET status = CASE 
+    WHEN status = 'aprovado' THEN 'conforme'
+    WHEN status = 'reprovado' THEN 'nao_conforme'
+    WHEN status = 'em_andamento' THEN 'em_andamento'
+    ELSE 'pendente'
+END;

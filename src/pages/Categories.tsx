@@ -142,6 +142,43 @@ function Categories() {
     }
   }
 
+  const getCategoryStatus = (categoryId: string) => {
+    const items = checklistData[categoryId] || []
+    if (!items.length) return 'pendente'
+
+    const totalItems = items.length
+    const invalidItems = items.filter((item: any) => item.status === 'invalid').length
+    const validItems = items.filter((item: any) => item.status === 'valid').length
+    const nonEvaluatedItems = totalItems - (invalidItems + validItems)
+
+    if (nonEvaluatedItems > 0) return 'em_andamento'
+    if (invalidItems === 0) return 'conforme'
+    if (invalidItems <= Math.floor(totalItems * 0.2)) return 'parcialmente_conforme'
+    return 'nao_conforme'
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'conforme':
+        return <CheckCircleIcon sx={{ color: 'success.main', mt: 1 }} />
+      case 'parcialmente_conforme':
+        return <ReportProblemIcon sx={{ color: 'warning.main', mt: 1 }} />
+      case 'nao_conforme':
+        return <ReportProblemIcon sx={{ color: 'error.main', mt: 1 }} />
+      case 'em_andamento':
+        return <CircularProgress size={20} sx={{ mt: 1 }} />
+      default:
+        return null
+    }
+  }
+
+  const canFinishInspection = () => {
+    return categories.every(category => {
+      const status = getCategoryStatus(category.id)
+      return status !== 'pendente' && status !== 'em_andamento'
+    })
+  }
+
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, px: 2 }}>
       <Paper sx={{ p: 3 }}>
@@ -151,7 +188,7 @@ function Categories() {
         <Grid container spacing={3} justifyContent="center">
           {categories.map((category) => {
             const Icon = category.icon
-            const isCompleted = checklistData[category.id]?.every((item: any) => item.status !== null)
+            const status = getCategoryStatus(category.id)
             
             return (
               <Grid item xs={12} sm={6} md={4} key={category.id}>
@@ -174,9 +211,14 @@ function Categories() {
                       <Typography variant="h6" component="div">
                         {category.name}
                       </Typography>
-                      {isCompleted && (
-                        <CheckCircleIcon sx={{ color: 'success.main', mt: 1 }} />
-                      )}
+                      {getStatusIcon(status)}
+                      <Typography variant="caption" color="textSecondary" display="block">
+                        {status === 'pendente' ? 'Pendente' :
+                         status === 'em_andamento' ? 'Em Andamento' :
+                         status === 'conforme' ? 'Conforme' :
+                         status === 'parcialmente_conforme' ? 'Parcialmente Conforme' :
+                         'Não Conforme'}
+                      </Typography>
                     </CardContent>
                   </CardActionArea>
                 </Card>
@@ -185,12 +227,19 @@ function Categories() {
           })}
         </Grid>
         {!showSignature ? (
-          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate('/')}
+            >
+              Voltar
+            </Button>
             <Button
               variant="contained"
               onClick={handleNext}
+              disabled={!canFinishInspection()}
             >
-              Avançar
+              Finalizar Vistoria
             </Button>
           </Box>
         ) : (
