@@ -1,11 +1,21 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Box, Button, Paper, Typography } from '@mui/material'
 import { PhotoCamera as CameraIcon, Refresh as RefreshIcon } from '@mui/icons-material'
+import { useNavigate } from 'react-router-dom'
 import Webcam from 'react-webcam'
 
 function Camera() {
+  const navigate = useNavigate()
   const webcamRef = useRef<Webcam>(null)
   const [photo, setPhoto] = useState<string | null>(null)
+  const [photoItem, setPhotoItem] = useState<any>(null)
+
+  useEffect(() => {
+    const savedPhotoItem = localStorage.getItem('current_photo_item')
+    if (savedPhotoItem) {
+      setPhotoItem(JSON.parse(savedPhotoItem))
+    }
+  }, [])
 
   const videoConstraints = {
     width: 1280,
@@ -25,8 +35,13 @@ function Camera() {
   }
 
   const savePhoto = () => {
-    // Aqui você implementaria a lógica para salvar a foto
-    console.log('Foto salva:', photo)
+    if (photo && photoItem) {
+      // Salva a foto no localStorage
+      localStorage.setItem('last_photo', photo)
+      
+      // Navega de volta para o checklist
+      navigate(`/checklist/${photoItem.truckId}/${photoItem.categoryId}`)
+    }
   }
 
   return (

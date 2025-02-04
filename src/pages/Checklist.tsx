@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   Box,
@@ -84,29 +84,77 @@ const categoryNames: Record<string, string> = {
 function Checklist() {
   const navigate = useNavigate()
   const { truckId, categoryId = 'exterior' } = useParams()
-  const [items, setItems] = useState<ChecklistItem[]>(checklistItems[categoryId] || [])
+  const [items, setItems] = useState<ChecklistItem[]>(() => {
+    // Tenta carregar os dados salvos do localStorage
+    const savedItems = localStorage.getItem(`checklist_${truckId}_${categoryId}`)
+    return savedItems ? JSON.parse(savedItems) : checklistItems[categoryId] || []
+  })
 
   const handleStatusChange = (id: number, value: 'valid' | 'invalid') => {
-    setItems(items.map(item =>
+    const newItems = items.map(item =>
       item.id === id ? { ...item, status: value } : item
-    ))
+    )
+    setItems(newItems)
+    // Salva no localStorage
+    localStorage.setItem(`checklist_${truckId}_${categoryId}`, JSON.stringify(newItems))
   }
 
   const handleObservationChange = (id: number, value: string) => {
-    setItems(items.map(item =>
+    const newItems = items.map(item =>
       item.id === id ? { ...item, observation: value } : item
-    ))
+    )
+    setItems(newItems)
+    // Salva no localStorage
+    localStorage.setItem(`checklist_${truckId}_${categoryId}`, JSON.stringify(newItems))
+  }
+
+  const handlePhotoUpdate = (id: number, photoUrl: string) => {
+    const newItems = items.map(item =>
+      item.id === id ? { ...item, photo: photoUrl } : item
+    )
+    setItems(newItems)
+    // Salva no localStorage
+    localStorage.setItem(`checklist_${truckId}_${categoryId}`, JSON.stringify(newItems))
   }
 
   const handleSave = () => {
-    // Aqui você implementaria a lógica para salvar o checklist
-    console.log('Checklist salvo:', items)
+    // Salva no localStorage antes de navegar
+    localStorage.setItem(`checklist_${truckId}_${categoryId}`, JSON.stringify(items))
     navigate(`/categories/${truckId}`)
   }
 
   const handleBack = () => {
+    // Salva no localStorage antes de voltar
+    localStorage.setItem(`checklist_${truckId}_${categoryId}`, JSON.stringify(items))
     navigate(`/categories/${truckId}`)
   }
+
+  const handleTakePhoto = async (itemId: number) => {
+    // Salva o ID do item que está sendo fotografado no localStorage
+    localStorage.setItem('current_photo_item', JSON.stringify({
+      truckId,
+      categoryId,
+      itemId
+    }))
+    navigate('/camera')
+  }
+
+  // Verifica se há uma foto recém-tirada ao montar o componente
+  useEffect(() => {
+    const lastPhoto = localStorage.getItem('last_photo')
+    const photoItem = localStorage.getItem('current_photo_item')
+    
+    if (lastPhoto && photoItem) {
+      const { truckId: photoTruckId, categoryId: photoCategoryId, itemId } = JSON.parse(photoItem)
+      
+      if (photoTruckId === truckId && photoCategoryId === categoryId) {
+        handlePhotoUpdate(itemId, lastPhoto)
+        // Limpa os dados da foto após atualizar
+        localStorage.removeItem('last_photo')
+        localStorage.removeItem('current_photo_item')
+      }
+    }
+  }, [])
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, px: 2 }}>
@@ -157,7 +205,7 @@ function Checklist() {
                 <Button
                   variant="outlined"
                   startIcon={<CameraIcon />}
-                  onClick={() => navigate('/camera')}
+                  onClick={() => handleTakePhoto(item.id)}
                   fullWidth
                 >
                   {item.photo ? 'Alterar Foto' : 'Adicionar Foto'}

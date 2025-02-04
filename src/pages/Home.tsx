@@ -7,8 +7,8 @@ function Home() {
   const navigate = useNavigate()
 
   const handleStartInspection = () => {
-    // Aqui você pode redirecionar para a página de seleção de tipo de vistoria ou iniciar diretamente
-    navigate('/categories/1'); // Assumindo que '1' é o ID para 'Iniciar Vistoria'
+    // Redireciona para a ChecklistForm com o ID do caminhão
+    navigate('/checklist-form/1'); // 1 é o ID do caminhão, pode ser dinâmico
   }
 
   const handleViewInspections = () => {

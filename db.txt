@@ -1,4 +1,3 @@
-
 -- Conecte-se ao banco de dados checklist_db manualmente antes de executar o restante do script
 
 -- Tabela: trucks (veículos inspecionados)
@@ -39,7 +38,7 @@ CREATE TABLE inspection_items (
     checklist_template_id INT,     -- Relação com o item padrão do checklist
     status VARCHAR(10),            -- 'valid' ou 'invalid' (NULL para 'não avaliado')
     observation TEXT,              -- Observações realizadas no item
-    photo VARCHAR(255),            -- Caminho ou URL da foto associada (pode ser NULL)
+    photo TEXT,                    -- URL ou dados base64 da foto
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (inspection_id) REFERENCES inspections(id),
     FOREIGN KEY (checklist_template_id) REFERENCES checklist_templates(id)
@@ -52,6 +51,15 @@ CREATE TABLE checklist_forms (
     form_data JSONB,               -- Armazena os dados do formulário em formato JSON
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (truck_id) REFERENCES trucks(id)
+);
+
+-- Tabela: signatures (assinaturas digitais)
+CREATE TABLE signatures (
+    id SERIAL PRIMARY KEY,
+    inspection_id INT UNIQUE,      -- Relação com a vistoria (inspection)
+    signature_data TEXT NOT NULL,  -- Dados da assinatura em base64
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (inspection_id) REFERENCES inspections(id)
 );
 
 -- Inserção das categorias padrão
