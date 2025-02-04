@@ -16,7 +16,7 @@ interface ChecklistItem {
   title: string
   status: 'valid' | 'invalid' | null
   observation: string
-  photo: string | null
+  photos: string[]
   category: string
 }
 
@@ -84,16 +84,36 @@ export const inspectionService = {
           checklist_template_id: item.id,
           status: item.status,
           observation: item.observation?.trim() || '',
-          photo: item.photo,
           category: item.category,
           updated_at: new Date().toISOString()
         }))
 
-      const { error: itemsError } = await supabase
+      const { data: savedItems, error: itemsError } = await supabase
         .from('inspection_items')
         .insert(inspectionItems)
+        .select()
 
       if (itemsError) throw itemsError
+
+      // Salvar as fotos para cada item
+      for (const item of savedItems) {
+        const originalItem = Object.values(data.checklistItems)
+          .flat()
+          .find(i => i.id === item.checklist_template_id)
+
+        if (originalItem?.photos?.length) {
+          const photoItems = originalItem.photos.map(photo => ({
+            inspection_item_id: item.id,
+            photo_url: photo
+          }))
+
+          const { error: photosError } = await supabase
+            .from('inspection_item_photos')
+            .insert(photoItems)
+
+          if (photosError) throw photosError
+        }
+      }
 
       // 4. Salva a assinatura na tabela signatures
       const { error: signatureError } = await supabase

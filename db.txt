@@ -41,7 +41,6 @@ CREATE TABLE inspection_items (
     checklist_template_id INT,     -- Relação com o item padrão do checklist
     status VARCHAR(10),            -- 'valid' ou 'invalid' (NULL para 'não avaliado')
     observation TEXT,              -- Observações realizadas no item
-    photo TEXT,                    -- URL ou dados base64 da foto
     category VARCHAR(50),          -- Categoria do item (ex: estruturaVeiculo)
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (inspection_id) REFERENCES inspections(id) ON DELETE CASCADE,
@@ -49,6 +48,22 @@ CREATE TABLE inspection_items (
     FOREIGN KEY (checklist_template_id) REFERENCES checklist_templates(id),
     FOREIGN KEY (category) REFERENCES categories(id)
 );
+
+-- Nova tabela para armazenar múltiplas fotos
+CREATE TABLE inspection_item_photos (
+    id SERIAL PRIMARY KEY,
+    inspection_item_id INT NOT NULL,
+    photo_url TEXT NOT NULL,       -- URL ou dados base64 da foto
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (inspection_item_id) REFERENCES inspection_items(id) ON DELETE CASCADE
+);
+
+-- Migrar dados existentes (se necessário)
+INSERT INTO inspection_item_photos (inspection_item_id, photo_url)
+SELECT id, photo FROM inspection_items WHERE photo IS NOT NULL;
+
+-- Remover coluna photo da tabela inspection_items
+ALTER TABLE inspection_items DROP COLUMN IF EXISTS photo;
 
 -- Tabela: checklist_forms (formulários de checklist)
 CREATE TABLE checklist_forms (

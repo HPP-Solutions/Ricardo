@@ -72,6 +72,7 @@ const InspectionDashboard = () => {
   const [criticalAlerts, setCriticalAlerts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [expandedPhoto, setExpandedPhoto] = useState<string | null>(null);
 
   const loadDashboardData = async () => {
     try {
@@ -195,13 +196,17 @@ const InspectionDashboard = () => {
     setSelectedInspection(inspection);
     setLoadingDetails(true);
     try {
-      // Buscar todos os itens com fotos
+      // Buscar todos os itens com suas respectivas fotos
       const { data: items, error: itemsError } = await supabase
         .from('inspection_items')
         .select(`
           *,
           categories:category (
             name
+          ),
+          inspection_item_photos (
+            id,
+            photo_url
           )
         `)
         .eq('inspection_id', inspection.id)
@@ -222,7 +227,12 @@ const InspectionDashboard = () => {
         if (!acc[categoryName]) {
           acc[categoryName] = [];
         }
-        acc[categoryName].push(item);
+        // Adicionar o array de fotos ao item
+        const itemWithPhotos = {
+          ...item,
+          photos: item.inspection_item_photos?.map((photo: any) => photo.photo_url) || []
+        };
+        acc[categoryName].push(itemWithPhotos);
         return acc;
       }, {});
 
@@ -254,7 +264,7 @@ const InspectionDashboard = () => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate('/');
+        navigate('/?showLogin=true');
         return;
       }
       loadDashboardData();
@@ -576,20 +586,26 @@ const InspectionDashboard = () => {
                             secondary={
                               <Box>
                                 {item.observation && <Typography variant="body2">{item.observation}</Typography>}
-                                {item.photo && (
+                                {item.photos && item.photos.length > 0 && (
                                   <Box mt={1}>
-                                    <Typography variant="caption">Foto:</Typography>
-                                    <img 
-                                      src={item.photo} 
-                                      alt={`Foto do item ${item.title}`}
-                                      style={{ 
-                                        maxWidth: '200px', 
-                                        maxHeight: '150px',
-                                        display: 'block',
-                                        marginTop: '8px',
-                                        borderRadius: '4px'
-                                      }}
-                                    />
+                                    <Typography variant="caption">Fotos ({item.photos.length}):</Typography>
+                                    <Box display="flex" gap={1} flexWrap="wrap" mt={1}>
+                                      {item.photos.map((photo: string, photoIndex: number) => (
+                                        <img 
+                                          key={photoIndex}
+                                          src={photo} 
+                                          alt={`Foto ${photoIndex + 1} do item ${item.title}`}
+                                          style={{ 
+                                            width: '100px', 
+                                            height: '100px',
+                                            objectFit: 'cover',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer'
+                                          }}
+                                          onClick={() => setExpandedPhoto(photo)}
+                                        />
+                                      ))}
+                                    </Box>
                                   </Box>
                                 )}
                               </Box>
@@ -631,6 +647,33 @@ const InspectionDashboard = () => {
               )}
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para expandir a foto */}
+      <Dialog
+        open={!!expandedPhoto}
+        onClose={() => setExpandedPhoto(null)}
+        maxWidth="lg"
+      >
+        <DialogContent>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            sx={{ overflow: 'hidden' }}
+          >
+            <img
+              src={expandedPhoto || ''}
+              alt="Foto expandida"
+              style={{
+                maxWidth: '90vw',
+                maxHeight: '90vh',
+                objectFit: 'contain',
+                borderRadius: '8px'
+              }}
+            />
+          </Box>
         </DialogContent>
       </Dialog>
     </Box>

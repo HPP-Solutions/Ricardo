@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import supabase from '../helper/supabaseClient'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -26,6 +26,15 @@ function Home() {
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const showLogin = urlParams.get('showLogin');
+    
+    if (showLogin === 'true') {
+      setOpenLoginModal(true);
+    }
+  }, []);
 
   const handleStartInspection = async () => {
     try {

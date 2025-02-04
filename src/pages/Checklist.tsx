@@ -25,52 +25,52 @@ interface ChecklistItem {
   title: string
   status: 'valid' | 'invalid' | null
   observation: string
-  photo: string | null
+  photos: string[]
   category: string
 }
 
 const checklistItems: Record<string, ChecklistItem[]> = {
   estruturaVeiculo: [
-    { id: 1, title: 'Para Brisa sem trincas', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
-    { id: 2, title: 'Lona Carroceria em bom estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
-    { id: 3, title: 'Tela Carroceria em bom estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
-    { id: 4, title: 'Arco da Cavaqueira em bom estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
-    { id: 5, title: 'Tampa dos tanques em bom estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
-    { id: 6, title: 'Tampa da Bateria em Bom Estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
-    { id: 7, title: 'Retrovisores em bom estado', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
-    { id: 8, title: 'Veiculo em perfeito estado de conservação', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
-    { id: 9, title: 'Possui travessa na cavaqueira', status: null, observation: '', photo: null, category: 'estruturaVeiculo' },
+    { id: 1, title: 'Para Brisa sem trincas', status: null, observation: '', photos: [], category: 'estruturaVeiculo' },
+    { id: 2, title: 'Lona Carroceria em bom estado', status: null, observation: '', photos: [], category: 'estruturaVeiculo' },
+    { id: 3, title: 'Tela Carroceria em bom estado', status: null, observation: '', photos: [], category: 'estruturaVeiculo' },
+    { id: 4, title: 'Arco da Cavaqueira em bom estado', status: null, observation: '', photos: [], category: 'estruturaVeiculo' },
+    { id: 5, title: 'Tampa dos tanques em bom estado', status: null, observation: '', photos: [], category: 'estruturaVeiculo' },
+    { id: 6, title: 'Tampa da Bateria em Bom Estado', status: null, observation: '', photos: [], category: 'estruturaVeiculo' },
+    { id: 7, title: 'Retrovisores em bom estado', status: null, observation: '', photos: [], category: 'estruturaVeiculo' },
+    { id: 8, title: 'Veiculo em perfeito estado de conservação', status: null, observation: '', photos: [], category: 'estruturaVeiculo' },
+    { id: 9, title: 'Possui travessa na cavaqueira', status: null, observation: '', photos: [], category: 'estruturaVeiculo' },
   ],
   pneusRodas: [
-    { id: 10, title: 'Pneus Cavalo em bom estado de conservação', status: null, observation: '', photo: null, category: 'pneusRodas' },
-    { id: 11, title: 'Pneus Carreta em bom estado de conservação', status: null, observation: '', photo: null, category: 'pneusRodas' },
-    { id: 12, title: 'Steps Pneus em bom estado de conservação', status: null, observation: '', photo: null, category: 'pneusRodas' },
-    { id: 13, title: 'Foi batido os p\'neus com Martelo de Borracha', status: null, observation: '', photo: null, category: 'pneusRodas' },
-    { id: 14, title: 'Freios em bom estado', status: null, observation: '', photo: null, category: 'pneusRodas' }, // Freios aqui, mas pode mover se preferir 'Sistema Mecânico'
+    { id: 10, title: 'Pneus Cavalo em bom estado de conservação', status: null, observation: '', photos: [], category: 'pneusRodas' },
+    { id: 11, title: 'Pneus Carreta em bom estado de conservação', status: null, observation: '', photos: [], category: 'pneusRodas' },
+    { id: 12, title: 'Steps Pneus em bom estado de conservação', status: null, observation: '', photos: [], category: 'pneusRodas' },
+    { id: 13, title: 'Foi batido os p\'neus com Martelo de Borracha', status: null, observation: '', photos: [], category: 'pneusRodas' },
+    { id: 14, title: 'Freios em bom estado', status: null, observation: '', photos: [], category: 'pneusRodas' },
   ],
   sistemaEletrico: [
-    { id: 15, title: 'Parte elétrica do cavalo funcionando', status: null, observation: '', photo: null, category: 'sistemaEletrico' },
-    { id: 16, title: 'Parte elétrica da carreta funcionando', status: null, observation: '', photo: null, category: 'sistemaEletrico' },
-    { id: 17, title: 'Possui luz de ré', status: null, observation: '', photo: null, category: 'sistemaEletrico' },
-    { id: 18, title: 'Buzina está funcionando', status: null, observation: '', photo: null, category: 'sistemaEletrico' },
-    { id: 19, title: 'Lampada de iluminação estão funcionando', status: null, observation: '', photo: null, category: 'sistemaEletrico' },
+    { id: 15, title: 'Parte elétrica do cavalo funcionando', status: null, observation: '', photos: [], category: 'sistemaEletrico' },
+    { id: 16, title: 'Parte elétrica da carreta funcionando', status: null, observation: '', photos: [], category: 'sistemaEletrico' },
+    { id: 17, title: 'Possui luz de ré', status: null, observation: '', photos: [], category: 'sistemaEletrico' },
+    { id: 18, title: 'Buzina está funcionando', status: null, observation: '', photos: [], category: 'sistemaEletrico' },
+    { id: 19, title: 'Lampada de iluminação estão funcionando', status: null, observation: '', photos: [], category: 'sistemaEletrico' },
   ],
   segurancaDocumentacao: [
-    { id: 20, title: 'Documentação em dia (Licenciamento e', status: null, observation: '', photo: null, category: 'segurancaDocumentacao' },
-    { id: 21, title: 'Possui triângulo extintor, cone', status: null, observation: '', photo: null, category: 'segurancaDocumentacao' },
-    { id: 22, title: 'Veiculo possui tacógrafo funcionando', status: null, observation: '', photo: null, category: 'segurancaDocumentacao' },
-    { id: 23, title: 'Motorista possui EPI', status: null, observation: '', photo: null, category: 'segurancaDocumentacao' },
-    { id: 24, title: 'Placa do cavalo e carreta estão legíveis', status: null, observation: '', photo: null, category: 'segurancaDocumentacao' },
+    { id: 20, title: 'Documentação em dia (Licenciamento e', status: null, observation: '', photos: [], category: 'segurancaDocumentacao' },
+    { id: 21, title: 'Possui triângulo extintor, cone', status: null, observation: '', photos: [], category: 'segurancaDocumentacao' },
+    { id: 22, title: 'Veiculo possui tacógrafo funcionando', status: null, observation: '', photos: [], category: 'segurancaDocumentacao' },
+    { id: 23, title: 'Motorista possui EPI', status: null, observation: '', photos: [], category: 'segurancaDocumentacao' },
+    { id: 24, title: 'Placa do cavalo e carreta estão legíveis', status: null, observation: '', photos: [], category: 'segurancaDocumentacao' },
   ],
   motorFluidos: [
-    { id: 25, title: 'Vazamento de óleo aparente', status: null, observation: '', photo: null, category: 'motorFluidos' },
-    { id: 26, title: 'Verificado Nível Óleo Motor', status: null, observation: '', photo: null, category: 'motorFluidos' },
-    { id: 27, title: 'Verificado Nível Água do motor', status: null, observation: '', photo: null, category: 'motorFluidos' },
-    { id: 28, title: 'Verificado Nível Combustível', status: null, observation: '', photo: null, category: 'motorFluidos' },
-    { id: 29, title: 'Verificado Nível Óleo Hidráulico Cavaqueira', status: null, observation: '', photo: null, category: 'motorFluidos' },
+    { id: 25, title: 'Vazamento de óleo aparente', status: null, observation: '', photos: [], category: 'motorFluidos' },
+    { id: 26, title: 'Verificado Nível Óleo Motor', status: null, observation: '', photos: [], category: 'motorFluidos' },
+    { id: 27, title: 'Verificado Nível Água do motor', status: null, observation: '', photos: [], category: 'motorFluidos' },
+    { id: 28, title: 'Verificado Nível Combustível', status: null, observation: '', photos: [], category: 'motorFluidos' },
+    { id: 29, title: 'Verificado Nível Óleo Hidráulico Cavaqueira', status: null, observation: '', photos: [], category: 'motorFluidos' },
   ],
   condicoesMotorista: [
-    { id: 30, title: 'Motorista trajando calça, camisa e sapatos', status: null, observation: '', photo: null, category: 'condicoesMotorista' },
+    { id: 30, title: 'Motorista trajando calça, camisa e sapatos', status: null, observation: '', photos: [], category: 'condicoesMotorista' },
   ]
 }
 
@@ -113,7 +113,7 @@ function Checklist() {
 
   const handlePhotoUpdate = (id: number, photoUrl: string) => {
     const newItems = items.map(item =>
-      item.id === id ? { ...item, photo: photoUrl } : item
+      item.id === id ? { ...item, photos: [...(item.photos || []), photoUrl] } : item
     )
     setItems(newItems)
     // Salva no localStorage
@@ -147,25 +147,35 @@ function Checklist() {
       ...item,
       status: Math.random() > 0.2 ? 'valid' as const : 'invalid' as const,
       observation: `Observação de teste para ${item.title} gerada automaticamente em ${new Date().toLocaleString()}`,
-      photo: null
+      photos: []
     }))
 
     setItems(newItems)
     localStorage.setItem(`checklist_${truckId}_${categoryId}`, JSON.stringify(newItems))
   }
 
-  // Verifica se há uma foto recém-tirada ao montar o componente
+  // Verifica se há fotos recém-tiradas ao montar o componente
   useEffect(() => {
-    const lastPhoto = localStorage.getItem('last_photo')
+    const lastPhotos = localStorage.getItem('last_photos')
     const photoItem = localStorage.getItem('current_photo_item')
     
-    if (lastPhoto && photoItem) {
+    if (lastPhotos && photoItem) {
       const { truckId: photoTruckId, categoryId: photoCategoryId, itemId } = JSON.parse(photoItem)
+      const photos = JSON.parse(lastPhotos)
       
       if (photoTruckId === truckId && photoCategoryId === categoryId) {
-        handlePhotoUpdate(itemId, lastPhoto)
-        // Limpa os dados da foto após atualizar
-        localStorage.removeItem('last_photo')
+        const newItems = items.map(item => {
+          if (item.id === itemId) {
+            return {
+              ...item,
+              photos: [...(item.photos || []), ...photos]
+            }
+          }
+          return item
+        })
+        setItems(newItems)
+        // Limpa os dados das fotos após atualizar
+        localStorage.removeItem('last_photos')
         localStorage.removeItem('current_photo_item')
       }
     }
@@ -231,29 +241,55 @@ function Checklist() {
                   rows={2}
                   sx={{ mb: 2 }}
                 />
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                   <Button
                     variant="outlined"
                     startIcon={<CameraIcon />}
                     onClick={() => handleTakePhoto(item.id)}
                   >
-                    {item.photo ? 'Alterar Foto' : 'Adicionar Foto'}
+                    Adicionar Foto
                   </Button>
-                  {item.photo && (
+                  {item.photos && item.photos.map((photo, photoIndex) => (
                     <Box
-                      component="img"
-                      src={item.photo}
-                      alt="Foto do item"
-                      sx={{
-                        width: 60,
-                        height: 60,
-                        objectFit: 'cover',
-                        borderRadius: 1,
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => setSelectedPhoto(item.photo)}
-                    />
-                  )}
+                      key={photoIndex}
+                      sx={{ position: 'relative' }}
+                    >
+                      <Box
+                        component="img"
+                        src={photo}
+                        alt={`Foto ${photoIndex + 1} do item`}
+                        sx={{
+                          width: 60,
+                          height: 60,
+                          objectFit: 'cover',
+                          borderRadius: 1,
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setSelectedPhoto(photo)}
+                      />
+                      <IconButton
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          top: -8,
+                          right: -8,
+                          bgcolor: 'background.paper',
+                          '&:hover': { bgcolor: 'error.light', color: 'white' }
+                        }}
+                        onClick={() => {
+                          const newItems = items.map(i => 
+                            i.id === item.id 
+                              ? { ...i, photos: i.photos.filter((_, idx) => idx !== photoIndex) }
+                              : i
+                          )
+                          setItems(newItems)
+                          localStorage.setItem(`checklist_${truckId}_${categoryId}`, JSON.stringify(newItems))
+                        }}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  ))}
                 </Box>
               </ListItem>
             </Box>
