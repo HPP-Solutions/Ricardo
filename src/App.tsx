@@ -5,9 +5,8 @@ import Home from './pages/Home'
 import Categories from './pages/Categories'
 import Checklist from './pages/Checklist'
 import ChecklistForm from './pages/ChecklistForm'
-
+import InspectionDashboard from './pages/InspectionDashboard'
 import Camera from './pages/Camera'
-
 
 function App() {
   return (
@@ -21,6 +20,7 @@ function App() {
           <Route path="/checklist/:truckId/:categoryId" element={<Checklist />} />
           <Route path="/checklist-form/:truckId" element={<ChecklistForm />} />
           <Route path="/camera" element={<Camera />} />
+          <Route path="/dashboard" element={<InspectionDashboard />} />
         </Routes>
       </Box>
     </Box>

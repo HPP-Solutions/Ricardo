@@ -14,6 +14,8 @@ import EmailIcon from '@mui/icons-material/Email';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import InputAdornment from '@mui/material/InputAdornment';
 import Avatar from '@mui/material/Avatar';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function Home() {
   const navigate = useNavigate()
@@ -22,6 +24,8 @@ function Home() {
     email: '',
     password: ''
   });
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleStartInspection = async () => {
     try {
@@ -49,14 +53,54 @@ function Home() {
   const handleCloseLoginModal = () => {
     setOpenLoginModal(false);
     setLoginData({ email: '', password: '' });
+    setError(null);
   }
 
-  const handleLogin = () => {
-    // Por enquanto apenas fecha o modal e navega
-    // Implementaremos a autenticação depois
-    handleCloseLoginModal();
-    navigate('/inspections');
+  const handleLogin = async () => {
+    try {
+      setError(null);
+      setIsLoading(true);
+
+      // Validação básica
+      if (!loginData.email || !loginData.password) {
+        setError('Por favor, preencha todos os campos');
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        handleCloseLoginModal();
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      // Tradução dos erros do Supabase
+      let errorMessage = 'Erro ao fazer login. Tente novamente.';
+      
+      if (error.message.includes('Invalid login credentials')) {
+        errorMessage = 'Email ou senha incorretos';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Email não confirmado';
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   }
+
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' && !isLoading) {
+      handleLogin();
+    }
+  };
 
   return (
     <Box sx={{ mx: 'auto', mt: 4, px: 2, maxWidth: 'md' }}>
@@ -95,7 +139,7 @@ function Home() {
               Visualize e gerencie as vistorias já realizadas.
             </Typography>
             <Button
-              variant="outlined"
+              variant="contained"
               color="primary"
               sx={{ mt: 2 }}
               onClick={handleViewInspections}
@@ -140,6 +184,11 @@ function Home() {
             Área Administrativa
           </DialogTitle>
           <DialogContent sx={{ width: '100%', p: 0 }}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
             <TextField
               autoFocus
               margin="dense"
@@ -149,6 +198,7 @@ function Home() {
               variant="outlined"
               value={loginData.email}
               onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+              onKeyPress={handleKeyPress}
               sx={{ mb: 2 }}
               InputProps={{
                 startAdornment: (
@@ -166,6 +216,7 @@ function Home() {
               variant="outlined"
               value={loginData.password}
               onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+              onKeyPress={handleKeyPress}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -187,19 +238,26 @@ function Home() {
                 color: 'text.secondary',
                 px: 3
               }}
+              disabled={isLoading}
             >
               Cancelar
             </Button>
             <Button 
               onClick={handleLogin} 
               variant="contained" 
+              disabled={isLoading}
               sx={{ 
                 px: 4,
                 py: 1,
-                borderRadius: 2
+                borderRadius: 2,
+                minWidth: 120
               }}
             >
-              Entrar
+              {isLoading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Entrar'
+              )}
             </Button>
           </DialogActions>
         </Box>

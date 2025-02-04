@@ -1,5 +1,5 @@
 import { AppBar, Toolbar, Typography, IconButton, Box } from '@mui/material'
-import { Home as HomeIcon, CheckCircle as CheckIcon, PhotoCamera as CameraIcon } from '@mui/icons-material'
+import { Home as HomeIcon, CheckCircle as CheckIcon, PhotoCamera as CameraIcon, Dashboard as DashboardIcon } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 
 function Navbar() {
@@ -20,6 +20,9 @@ function Navbar() {
           </IconButton>
           <IconButton color="inherit" onClick={() => navigate('/camera')}>
             <CameraIcon />
+          </IconButton>
+          <IconButton color="inherit" onClick={() => navigate('/dashboard')}>
+            <DashboardIcon />
           </IconButton>
         </Box>
       </Toolbar>
