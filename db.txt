@@ -26,40 +26,49 @@ CREATE TABLE checklist_templates (
 -- Tabela: inspections (registros de vistorias realizadas)
 CREATE TABLE inspections (
     id SERIAL PRIMARY KEY,
-    truck_id INT,                  -- Relação com o veículo inspecionado
+    truck_id INT NOT NULL,         -- Relação com o veículo inspecionado
     inspection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Data e hora da vistoria
-    FOREIGN KEY (truck_id) REFERENCES trucks(id)
+    status VARCHAR(20) DEFAULT 'em_andamento',  -- Status da vistoria: em_andamento, concluida, cancelada
+    FOREIGN KEY (truck_id) REFERENCES trucks(id) ON DELETE CASCADE
 );
 
 -- Tabela: inspection_items (respostas para cada item de checklist em uma vistoria)
 CREATE TABLE inspection_items (
     id SERIAL PRIMARY KEY,
-    inspection_id INT,             -- Relação com a vistoria (inspection)
+    inspection_id INT NOT NULL,    -- Relação com a vistoria (inspection)
+    truck_id INT NOT NULL,         -- Relação direta com o veículo para facilitar consultas
     checklist_template_id INT,     -- Relação com o item padrão do checklist
     status VARCHAR(10),            -- 'valid' ou 'invalid' (NULL para 'não avaliado')
     observation TEXT,              -- Observações realizadas no item
     photo TEXT,                    -- URL ou dados base64 da foto
+    category VARCHAR(50),          -- Categoria do item (ex: estruturaVeiculo)
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (inspection_id) REFERENCES inspections(id),
-    FOREIGN KEY (checklist_template_id) REFERENCES checklist_templates(id)
+    FOREIGN KEY (inspection_id) REFERENCES inspections(id) ON DELETE CASCADE,
+    FOREIGN KEY (truck_id) REFERENCES trucks(id) ON DELETE CASCADE,
+    FOREIGN KEY (checklist_template_id) REFERENCES checklist_templates(id),
+    FOREIGN KEY (category) REFERENCES categories(id)
 );
 
 -- Tabela: checklist_forms (formulários de checklist)
 CREATE TABLE checklist_forms (
     id SERIAL PRIMARY KEY,
-    truck_id INT,                  -- Relação com o veículo inspecionado
-    form_data JSONB,               -- Armazena os dados do formulário em formato JSON
+    inspection_id INT NOT NULL,    -- Relação com a vistoria
+    truck_id INT NOT NULL,         -- Relação direta com o veículo para facilitar consultas
+    form_data JSONB,              -- Armazena os dados do formulário em formato JSON
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (truck_id) REFERENCES trucks(id)
+    FOREIGN KEY (inspection_id) REFERENCES inspections(id) ON DELETE CASCADE,
+    FOREIGN KEY (truck_id) REFERENCES trucks(id) ON DELETE CASCADE
 );
 
 -- Tabela: signatures (assinaturas digitais)
 CREATE TABLE signatures (
     id SERIAL PRIMARY KEY,
-    inspection_id INT UNIQUE,      -- Relação com a vistoria (inspection)
-    signature_data TEXT NOT NULL,  -- Dados da assinatura em base64
+    inspection_id INT UNIQUE NOT NULL,  -- Relação com a vistoria (inspection)
+    truck_id INT NOT NULL,              -- Relação direta com o veículo para facilitar consultas
+    signature_data TEXT NOT NULL,       -- Dados da assinatura em base64
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (inspection_id) REFERENCES inspections(id)
+    FOREIGN KEY (inspection_id) REFERENCES inspections(id) ON DELETE CASCADE,
+    FOREIGN KEY (truck_id) REFERENCES trucks(id) ON DELETE CASCADE
 );
 
 -- Inserção das categorias padrão

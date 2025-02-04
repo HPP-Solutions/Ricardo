@@ -2,6 +2,7 @@ import { Box, Paper, Button } from '@mui/material'
 import { useParams, useNavigate } from 'react-router-dom'
 import ChecklistHeader from '../components/ChecklistHeader'
 import { useEffect, useState } from 'react'
+import supabase from '../helper/supabaseClient'
 
 interface FormData {
   motorista: string
@@ -41,7 +42,7 @@ function ChecklistForm() {
     localStorage.setItem(`checklistForm_${truckId}`, JSON.stringify(data))
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Validação dos campos obrigatórios
     const requiredFields = ['motorista', 'placaCavalo', 'placaCarreta', 'tipoVeiculo', 'data'] as const
     const emptyFields = requiredFields.filter(field => !formData[field])
@@ -59,9 +60,25 @@ function ChecklistForm() {
       return
     }
 
-    // Salva os dados atuais antes de navegar
-    localStorage.setItem(`checklistForm_${truckId}`, JSON.stringify(formData))
-    navigate(`/categories/${truckId}`)
+    try {
+      // Cria o registro do truck
+      const { data: truck, error: truckError } = await supabase
+        .from('trucks')
+        .insert([{
+          nome: `${formData.placaCavalo} - ${formData.placaCarreta} (${formData.tipoVeiculo})`
+        }])
+        .select()
+        .single()
+
+      if (truckError) throw truckError
+
+      // Salva os dados atuais antes de navegar
+      localStorage.setItem(`checklistForm_${truckId}`, JSON.stringify(formData))
+      navigate(`/categories/${truck.id}`)
+    } catch (error) {
+      console.error('Erro ao criar registro do caminhão:', error)
+      alert('Ocorreu um erro ao salvar os dados. Por favor, tente novamente.')
+    }
   }
 
   const handleBack = () => {

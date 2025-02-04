@@ -1,6 +1,7 @@
-import { Box, Grid, TextField, Typography, Paper } from '@mui/material'
+import { Box, Grid, TextField, Typography, Paper, IconButton } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import BugReportIcon from '@mui/icons-material/BugReport'
 
 interface InspectionFormData {
   motorista: string
@@ -35,8 +36,44 @@ function ChecklistHeader({ onDataChange, initialData }: ChecklistHeaderProps) {
     onDataChange?.(newData)
   }
 
+  const handleAutoFill = () => {
+    const placas = ['ABC1234', 'XYZ5678', 'DEF9012', 'GHI3456']
+    const tipos = ['Carreta', 'Truck', 'Bitrem', 'Rodotrem']
+    const nomes = ['João Silva', 'Pedro Santos', 'Maria Oliveira', 'José Pereira']
+    const rotas = ['SP-RJ', 'MG-ES', 'PR-SC', 'BA-SE']
+
+    const newData = {
+      ...formData,
+      motorista: nomes[Math.floor(Math.random() * nomes.length)],
+      placaCavalo: placas[Math.floor(Math.random() * placas.length)],
+      placaCarreta: placas[Math.floor(Math.random() * placas.length)],
+      tipoVeiculo: tipos[Math.floor(Math.random() * tipos.length)],
+      dataEmissao: new Date().toISOString().split('T')[0],
+      observacoes: 'Observações de teste geradas automaticamente',
+      rota: rotas[Math.floor(Math.random() * rotas.length)],
+      data: new Date().toISOString().split('T')[0]
+    }
+
+    setFormData(newData)
+    onDataChange?.(newData)
+  }
+
   return (
-    <Paper sx={{ p: 3, mb: 3 }}>
+    <Paper sx={{ p: 3, mb: 3, position: 'relative' }}>
+      <IconButton 
+        onClick={handleAutoFill}
+        sx={{ 
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          opacity: 0.3,
+          '&:hover': { opacity: 1 }
+        }}
+        title="Preencher automaticamente (teste)"
+      >
+        <BugReportIcon />
+      </IconButton>
+
       <Typography variant="h5" gutterBottom align="center" sx={{ mb: 3 }}>
         IDENTIFICAÇÃO
       </Typography>

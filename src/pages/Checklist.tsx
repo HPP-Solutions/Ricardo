@@ -16,7 +16,7 @@ import {
   IconButton,
   Chip
 } from '@mui/material'
-import { PhotoCamera as CameraIcon, ArrowBack as BackIcon } from '@mui/icons-material'
+import { PhotoCamera as CameraIcon, ArrowBack as BackIcon, BugReport as BugReportIcon } from '@mui/icons-material'
 
 interface ChecklistItem {
   id: number
@@ -139,6 +139,18 @@ function Checklist() {
     navigate('/camera')
   }
 
+  const handleAutoFill = () => {
+    const newItems = items.map(item => ({
+      ...item,
+      status: Math.random() > 0.2 ? 'valid' as const : 'invalid' as const,
+      observation: `Observação de teste para ${item.title} gerada automaticamente em ${new Date().toLocaleString()}`,
+      photo: null
+    }))
+
+    setItems(newItems)
+    localStorage.setItem(`checklist_${truckId}_${categoryId}`, JSON.stringify(newItems))
+  }
+
   // Verifica se há uma foto recém-tirada ao montar o componente
   useEffect(() => {
     const lastPhoto = localStorage.getItem('last_photo')
@@ -158,7 +170,21 @@ function Checklist() {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, px: 2 }}>
-      <Paper sx={{ p: 3 }}>
+      <Paper sx={{ p: 3, position: 'relative' }}>
+        <IconButton 
+          onClick={handleAutoFill}
+          sx={{ 
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            opacity: 0.3,
+            '&:hover': { opacity: 1 }
+          }}
+          title="Preencher automaticamente (teste)"
+        >
+          <BugReportIcon />
+        </IconButton>
+
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <IconButton onClick={handleBack} sx={{ mr: 2 }}>
             <BackIcon />

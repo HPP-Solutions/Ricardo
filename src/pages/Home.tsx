@@ -2,13 +2,28 @@ import { Box, Typography, Card, CardContent, CardMedia, CardActionArea, Button, 
 import { useNavigate } from 'react-router-dom'
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import supabase from '../helper/supabaseClient'
 
 function Home() {
   const navigate = useNavigate()
 
-  const handleStartInspection = () => {
-    // Redireciona para a ChecklistForm com o ID do caminhão
-    navigate('/checklist-form/1'); // 1 é o ID do caminhão, pode ser dinâmico
+  const handleStartInspection = async () => {
+    try {
+      // Cria um novo registro de caminhão com nome temporário
+      const { data: truck, error } = await supabase
+        .from('trucks')
+        .insert([{ nome: 'Novo Veículo' }])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Redireciona para o formulário com o ID do novo caminhão
+      navigate(`/checklist-form/${truck.id}`)
+    } catch (error) {
+      console.error('Erro ao criar novo registro:', error)
+      alert('Erro ao iniciar nova vistoria. Por favor, tente novamente.')
+    }
   }
 
   const handleViewInspections = () => {

@@ -29,27 +29,14 @@ interface InspectionData {
 export const inspectionService = {
   async saveInspection(truckId: number, data: InspectionData) {
     try {
-      // 1. Primeiro, insere o registro na tabela trucks se não existir
-      const { data: truck, error: truckError } = await supabase
-        .from('trucks')
-        .upsert([
-          {
-            id: truckId,
-            nome: `${data.formData.placaCavalo} - ${data.formData.placaCarreta}`,
-          }
-        ])
-        .select()
-        .single()
-
-      if (truckError) throw truckError
-
-      // 2. Cria um novo registro de inspeção
+      // 1. Cria um novo registro de inspeção
       const { data: inspection, error: inspectionError } = await supabase
         .from('inspections')
         .insert([
           {
             truck_id: truckId,
-            inspection_date: new Date().toISOString()
+            inspection_date: new Date().toISOString(),
+            status: 'em_andamento'
           }
         ])
         .select()
@@ -57,8 +44,9 @@ export const inspectionService = {
 
       if (inspectionError) throw inspectionError
 
-      // 3. Salva os dados do formulário com todos os campos necessários
+      // 2. Salva os dados do formulário com todos os campos necessários
       const formDataToSave = {
+        inspection_id: inspection.id,
         truck_id: truckId,
         form_data: {
           inspection_id: inspection.id,
@@ -87,17 +75,18 @@ export const inspectionService = {
 
       if (formError) throw formError
 
-      // 4. Salva os itens do checklist com informações detalhadas
+      // 3. Salva os itens do checklist com informações detalhadas
       const inspectionItems = Object.values(data.checklistItems)
         .flat()
         .map(item => ({
           inspection_id: inspection.id,
+          truck_id: truckId,
           checklist_template_id: item.id,
           status: item.status,
           observation: item.observation?.trim() || '',
           photo: item.photo,
-          updated_at: new Date().toISOString(),
-          category: item.category
+          category: item.category,
+          updated_at: new Date().toISOString()
         }))
 
       const { error: itemsError } = await supabase
@@ -106,17 +95,26 @@ export const inspectionService = {
 
       if (itemsError) throw itemsError
 
-      // 5. Salva a assinatura na tabela signatures
+      // 4. Salva a assinatura na tabela signatures
       const { error: signatureError } = await supabase
         .from('signatures')
         .insert([
           {
             inspection_id: inspection.id,
+            truck_id: truckId,
             signature_data: data.signature
           }
         ])
 
       if (signatureError) throw signatureError
+
+      // 5. Atualiza o status da inspeção para concluído
+      const { error: updateInspectionError } = await supabase
+        .from('inspections')
+        .update({ status: 'concluida' })
+        .eq('id', inspection.id)
+
+      if (updateInspectionError) throw updateInspectionError
 
       return { success: true, inspectionId: inspection.id }
     } catch (error) {
