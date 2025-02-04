@@ -14,9 +14,11 @@ import {
   RadioGroup,
   Divider,
   IconButton,
-  Chip
+  Chip,
+  Dialog,
+  DialogContent
 } from '@mui/material'
-import { PhotoCamera as CameraIcon, ArrowBack as BackIcon, BugReport as BugReportIcon } from '@mui/icons-material'
+import { PhotoCamera as CameraIcon, ArrowBack as BackIcon, BugReport as BugReportIcon, Close as CloseIcon } from '@mui/icons-material'
 
 interface ChecklistItem {
   id: number
@@ -89,6 +91,7 @@ function Checklist() {
     const savedItems = localStorage.getItem(`checklist_${truckId}_${categoryId}`)
     return savedItems ? JSON.parse(savedItems) : checklistItems[categoryId] || []
   })
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null)
 
   const handleStatusChange = (id: number, value: 'valid' | 'invalid') => {
     const newItems = items.map(item =>
@@ -228,14 +231,30 @@ function Checklist() {
                   rows={2}
                   sx={{ mb: 2 }}
                 />
-                <Button
-                  variant="outlined"
-                  startIcon={<CameraIcon />}
-                  onClick={() => handleTakePhoto(item.id)}
-                  fullWidth
-                >
-                  {item.photo ? 'Alterar Foto' : 'Adicionar Foto'}
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<CameraIcon />}
+                    onClick={() => handleTakePhoto(item.id)}
+                  >
+                    {item.photo ? 'Alterar Foto' : 'Adicionar Foto'}
+                  </Button>
+                  {item.photo && (
+                    <Box
+                      component="img"
+                      src={item.photo}
+                      alt="Foto do item"
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        objectFit: 'cover',
+                        borderRadius: 1,
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => setSelectedPhoto(item.photo)}
+                    />
+                  )}
+                </Box>
               </ListItem>
             </Box>
           ))}
@@ -255,6 +274,44 @@ function Checklist() {
           </Button>
         </Box>
       </Paper>
+
+      {/* Dialog para visualização da foto em tamanho maior */}
+      <Dialog
+        open={!!selectedPhoto}
+        onClose={() => setSelectedPhoto(null)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContent sx={{ p: 0, position: 'relative' }}>
+          <IconButton
+            onClick={() => setSelectedPhoto(null)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              bgcolor: 'rgba(0, 0, 0, 0.5)',
+              color: 'white',
+              '&:hover': {
+                bgcolor: 'rgba(0, 0, 0, 0.7)'
+              }
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+          {selectedPhoto && (
+            <Box
+              component="img"
+              src={selectedPhoto}
+              alt="Foto ampliada"
+              sx={{
+                width: '100%',
+                height: 'auto',
+                display: 'block'
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   )
 }
