@@ -16,9 +16,11 @@ import {
   IconButton,
   Chip,
   Dialog,
-  DialogContent
+  DialogContent,
+  InputAdornment
 } from '@mui/material'
 import { PhotoCamera as CameraIcon, ArrowBack as BackIcon, BugReport as BugReportIcon, Close as CloseIcon } from '@mui/icons-material'
+import { InspectionTimer } from '../components/InspectionTimer'
 
 interface ChecklistItem {
   id: number
@@ -27,6 +29,8 @@ interface ChecklistItem {
   observation: string
   photos: string[]
   category: string
+  isKmInput?: boolean
+  kmValue?: string
 }
 
 const checklistItems: Record<string, ChecklistItem[]> = {
@@ -45,7 +49,7 @@ const checklistItems: Record<string, ChecklistItem[]> = {
     { id: 10, title: 'Pneus Cavalo em bom estado de conservação', status: null, observation: '', photos: [], category: 'pneusRodas' },
     { id: 11, title: 'Pneus Carreta em bom estado de conservação', status: null, observation: '', photos: [], category: 'pneusRodas' },
     { id: 12, title: 'Steps Pneus em bom estado de conservação', status: null, observation: '', photos: [], category: 'pneusRodas' },
-    { id: 13, title: 'Foi batido os p\'neus com Martelo de Borracha', status: null, observation: '', photos: [], category: 'pneusRodas' },
+    { id: 13, title: 'Foi batido os pneus com Martelo de Borracha', status: null, observation: '', photos: [], category: 'pneusRodas' },
     { id: 14, title: 'Freios em bom estado', status: null, observation: '', photos: [], category: 'pneusRodas' },
   ],
   sistemaEletrico: [
@@ -71,6 +75,18 @@ const checklistItems: Record<string, ChecklistItem[]> = {
   ],
   condicoesMotorista: [
     { id: 30, title: 'Motorista trajando calça, camisa e sapatos', status: null, observation: '', photos: [], category: 'condicoesMotorista' },
+  ],
+  odometro: [
+    { 
+      id: 31, 
+      title: 'Quilometragem atual do veículo', 
+      status: null, 
+      observation: '', 
+      photos: [], 
+      category: 'odometro',
+      isKmInput: true,
+      kmValue: ''
+    }
   ]
 }
 
@@ -80,7 +96,8 @@ const categoryNames: Record<string, string> = {
   sistemaEletrico: 'Sistema Elétrico',
   segurancaDocumentacao: 'Segurança e Documentação',
   motorFluidos: 'Motor e Fluidos',
-  condicoesMotorista: 'Condições do Motorista'
+  condicoesMotorista: 'Condições do Motorista',
+  odometro: 'Odômetro'
 }
 
 function Checklist() {
@@ -143,13 +160,40 @@ function Checklist() {
   }
 
   const handleAutoFill = () => {
-    const newItems = items.map(item => ({
-      ...item,
-      status: Math.random() > 0.2 ? 'valid' as const : 'invalid' as const,
-      observation: `Observação de teste para ${item.title} gerada automaticamente em ${new Date().toLocaleString()}`,
-      photos: []
-    }))
+    const newItems = items.map(item => {
+      if (item.isKmInput) {
+        const randomKm = Math.floor(Math.random() * 500000).toString() // Gera um número entre 0 e 500000
+        return {
+          ...item,
+          kmValue: randomKm,
+          status: 'valid' as const,
+          observation: `Quilometragem registrada automaticamente em ${new Date().toLocaleString()}`
+        }
+      }
 
+      return {
+        ...item,
+        status: Math.random() > 0.2 ? 'valid' as const : 'invalid' as const,
+        observation: `Observação de teste para ${item.title} gerada automaticamente em ${new Date().toLocaleString()}`,
+        photos: []
+      }
+    })
+
+    setItems(newItems)
+    localStorage.setItem(`checklist_${truckId}_${categoryId}`, JSON.stringify(newItems))
+  }
+
+  const handleKmValueChange = (id: number, value: string) => {
+    // Permite apenas números
+    if (!/^\d*$/.test(value)) return
+
+    const newItems = items.map(item =>
+      item.id === id ? { 
+        ...item, 
+        kmValue: value, 
+        status: value ? 'valid' as const : null 
+      } : item
+    )
     setItems(newItems)
     localStorage.setItem(`checklist_${truckId}_${categoryId}`, JSON.stringify(newItems))
   }
@@ -182,7 +226,8 @@ function Checklist() {
   }, [])
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, px: 2 }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', mt: { xs: 0, sm: 4 }, px: 2 }}>
+      <InspectionTimer showAlert={false} />
       <Paper sx={{ p: 3, position: 'relative' }}>
         <IconButton 
           onClick={handleAutoFill}
@@ -198,7 +243,7 @@ function Checklist() {
           <BugReportIcon />
         </IconButton>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, mt: 1 }}>
           <IconButton onClick={handleBack} sx={{ mr: 2 }}>
             <BackIcon />
           </IconButton>
@@ -228,43 +273,52 @@ function Checklist() {
                     size="small"
                   />
                 </Box>
-                <RadioGroup
-                  row
-                  value={item.status || ''}
-                  onChange={(e) => handleStatusChange(item.id, e.target.value as 'valid' | 'invalid')}
-                  sx={{ mb: 2 }}
-                >
-                  <FormControlLabel value="valid" control={<Radio />} label="Conforme" />
-                  <FormControlLabel value="invalid" control={<Radio />} label="Não Conforme" />
-                </RadioGroup>
-                {item.status === 'invalid' && (
+
+                {item.isKmInput ? (
                   <TextField
                     fullWidth
-                    label="Observações (obrigatório para itens não conformes)"
+                    label="Quilometragem"
                     variant="outlined"
-                    value={item.observation}
-                    onChange={(e) => handleObservationChange(item.id, e.target.value)}
-                    size="small"
-                    multiline
-                    rows={2}
+                    value={item.kmValue || ''}
+                    onChange={(e) => handleKmValueChange(item.id, e.target.value)}
+                    type="text"
+                    InputProps={{
+                      endAdornment: <InputAdornment position="end">km</InputAdornment>,
+                    }}
+                    placeholder="Digite a quilometragem atual"
                     required
-                    error={!item.observation}
-                    helperText={!item.observation ? "Por favor, descreva o problema encontrado" : ""}
+                    error={!item.kmValue}
+                    helperText={!item.kmValue ? "Por favor, insira a quilometragem atual do veículo" : ""}
                     sx={{ mb: 2 }}
                   />
-                )}
-                {item.status === 'valid' && (
-                  <TextField
-                    fullWidth
-                    label="Observações (opcional)"
-                    variant="outlined"
-                    value={item.observation}
-                    onChange={(e) => handleObservationChange(item.id, e.target.value)}
-                    size="small"
-                    multiline
-                    rows={2}
-                    sx={{ mb: 2 }}
-                  />
+                ) : (
+                  <>
+                    <RadioGroup
+                      row
+                      value={item.status || ''}
+                      onChange={(e) => handleStatusChange(item.id, e.target.value as 'valid' | 'invalid')}
+                      sx={{ mb: 2 }}
+                    >
+                      <FormControlLabel value="valid" control={<Radio />} label="Conforme" />
+                      <FormControlLabel value="invalid" control={<Radio />} label="Não Conforme" />
+                    </RadioGroup>
+                    {!item.isKmInput && (
+                      <TextField
+                        fullWidth
+                        label={item.status === 'invalid' ? "Observações (obrigatório para itens não conformes)" : "Observações"}
+                        variant="outlined"
+                        value={item.observation}
+                        onChange={(e) => handleObservationChange(item.id, e.target.value)}
+                        size="small"
+                        multiline
+                        rows={2}
+                        required={item.status === 'invalid'}
+                        error={item.status === 'invalid' && !item.observation}
+                        helperText={item.status === 'invalid' && !item.observation ? "Por favor, descreva o problema encontrado" : ""}
+                        sx={{ mb: 2 }}
+                      />
+                    )}
+                  </>
                 )}
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                   <Button

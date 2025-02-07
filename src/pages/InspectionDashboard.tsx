@@ -26,6 +26,7 @@ import {
   Tab,
   Tabs,
   Button,
+  Pagination,
 } from '@mui/material';
 import {
   BarChart,
@@ -75,6 +76,8 @@ const InspectionDashboard = () => {
   const [timeRange, setTimeRange] = useState('7'); // '7', '15', '30' dias
   const [inspectionTrends, setInspectionTrends] = useState<any[]>([]);
   const [selectedTruckStats, setSelectedTruckStats] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [itemsPerPage] = useState(6);
 
   const loadInspectionData = async () => {
     try {
@@ -292,6 +295,11 @@ const InspectionDashboard = () => {
     setTruckFilter(event.target.value as string);
   };
 
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -330,6 +338,13 @@ const InspectionDashboard = () => {
     const matchesTruck = truckFilter === 'all' || inspection.truck_id.toString() === truckFilter;
     return matchesSearch && matchesStatus && matchesTruck;
   });
+
+  const paginatedInspections = filteredInspections.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredInspections.length / itemsPerPage);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -486,107 +501,77 @@ const InspectionDashboard = () => {
             </Grid>
           </Paper>
 
-          {/* Lista de Vistorias com Priorização */}
-          <Box mb={2}>
-            <Typography variant="h6" gutterBottom>
-              Vistorias Prioritárias
-            </Typography>
-            <Grid container spacing={2}>
-              {filteredInspections
-                .filter(inspection => inspection.status === 'nao_conforme')
-                .map((inspection) => (
-                  <Grid item xs={12} md={4} key={inspection.id}>
-                    <Card 
-                      sx={{ 
-                        cursor: 'pointer',
-                        '&:hover': { boxShadow: 6 },
-                        borderLeft: '4px solid #f44336'
-                      }}
-                      onClick={() => handleInspectionClick(inspection)}
-                    >
-                      <CardContent>
-                        <Box display="flex" justifyContent="space-between" alignItems="center">
-                          <Box>
-                            <Typography variant="h6" component="div" gutterBottom>
-                              {inspection.trucks?.nome}
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              Código: {inspection.reference_code}
-                            </Typography>
-                            <Typography variant="body2" color="error">
-                              Requer atenção imediata
-                            </Typography>
-                          </Box>
-                          <Box textAlign="right">
-                            {getStatusIcon(inspection.status)}
-                            <Typography variant="caption" display="block">
-                              {format(new Date(inspection.inspection_date), "dd/MM/yyyy")}
-                            </Typography>
-                            <Typography variant="caption" display="block">
-                              {format(new Date(inspection.inspection_date), "HH:mm")}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-            </Grid>
-          </Box>
-
-          {/* Lista de Vistorias Regular */}
+          {/* Lista de Vistorias */}
           <Box>
-            <Typography variant="h6" gutterBottom>
-              Todas as Vistorias
-            </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography variant="h6">
+                Vistorias
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Mostrando {paginatedInspections.length} de {filteredInspections.length} vistorias
+              </Typography>
+            </Box>
             <Grid container spacing={2}>
-              {filteredInspections
-                .filter(inspection => inspection.status !== 'nao_conforme')
-                .map((inspection) => (
-                  <Grid item xs={12} md={4} key={inspection.id}>
-                    <Card 
-                      sx={{ 
-                        cursor: 'pointer',
-                        '&:hover': { boxShadow: 6 },
-                        borderLeft: `4px solid ${
-                          inspection.status === 'conforme' ? '#4caf50' :
-                          inspection.status === 'parcialmente_conforme' ? '#ff9800' :
-                          '#2196f3'
-                        }`
-                      }}
-                      onClick={() => handleInspectionClick(inspection)}
-                    >
-                      <CardContent>
-                        <Box display="flex" justifyContent="space-between" alignItems="center">
-                          <Box>
-                            <Typography variant="h6" component="div" gutterBottom>
-                              {inspection.trucks?.nome}
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              Código: {inspection.reference_code}
-                            </Typography>
-                            <Chip 
-                              label={inspection.status.replace('_', ' ')}
-                              color={getStatusColor(inspection.status)}
-                              size="small"
-                              sx={{ mt: 1 }}
-                            />
-                          </Box>
-                          <Box textAlign="right">
-                            {getStatusIcon(inspection.status)}
-                            <Typography variant="caption" display="block">
-                              {format(new Date(inspection.inspection_date), "dd/MM/yyyy")}
-                            </Typography>
-                            <Typography variant="caption" display="block">
-                              {format(new Date(inspection.inspection_date), "HH:mm")}
-                            </Typography>
-                          </Box>
+              {paginatedInspections.map((inspection) => (
+                <Grid item xs={12} md={4} key={inspection.id}>
+                  <Card 
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': { boxShadow: 6 },
+                      borderLeft: `4px solid ${
+                        inspection.status === 'conforme' ? '#4caf50' :
+                        inspection.status === 'parcialmente_conforme' ? '#ff9800' :
+                        inspection.status === 'nao_conforme' ? '#f44336' :
+                        '#2196f3'
+                      }`
+                    }}
+                    onClick={() => handleInspectionClick(inspection)}
+                  >
+                    <CardContent>
+                      <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Box>
+                          <Typography variant="h6" component="div" gutterBottom>
+                            {inspection.trucks?.nome}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Código: {inspection.reference_code}
+                          </Typography>
+                          <Chip 
+                            label={inspection.status.replace('_', ' ')}
+                            color={getStatusColor(inspection.status)}
+                            size="small"
+                            sx={{ mt: 1 }}
+                          />
                         </Box>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
+                        <Box textAlign="right">
+                          {getStatusIcon(inspection.status)}
+                          <Typography variant="caption" display="block">
+                            {format(new Date(inspection.inspection_date), "dd/MM/yyyy")}
+                          </Typography>
+                          <Typography variant="caption" display="block">
+                            {format(new Date(inspection.inspection_date), "HH:mm")}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
             </Grid>
+            
+            {totalPages > 1 && (
+              <Box display="flex" justifyContent="center" mt={4} mb={2}>
+                <Pagination 
+                  count={totalPages} 
+                  page={page} 
+                  onChange={handlePageChange}
+                  color="primary"
+                  size="large"
+                  showFirstButton
+                  showLastButton
+                />
+              </Box>
+            )}
           </Box>
         </>
       )}

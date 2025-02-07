@@ -1,4 +1,4 @@
-import { Box, Typography, Grid, Card, CardContent, CardActionArea, Button, Paper, CircularProgress } from '@mui/material'
+import { Box, Typography, Grid, Card, CardContent, CardActionArea, Button, Paper, CircularProgress, IconButton, Alert } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
@@ -18,8 +18,24 @@ import {
   LocalGasStation as LocalGasStationIcon,
   SettingsSuggest as SettingsSuggestIcon,
   TireRepair as TireRepairIcon,
+  BugReport as BugReportIcon,
+  Timer as TimerIcon,
+  Speed as SpeedIcon
 } from '@mui/icons-material'
 import { inspectionService } from '../services/inspectionService'
+import { InspectionTimer } from '../components/InspectionTimer'
+import { useTimer } from '../contexts/TimerContext'
+
+interface InspectionFormData {
+  motorista: string
+  placaCavalo: string
+  placaCarreta: string
+  tipoVeiculo: string
+  dataEmissao: string
+  observacoes: string
+  rota: string
+  data: string
+}
 
 const categories = [
   {
@@ -58,6 +74,12 @@ const categories = [
     icon: FaceIcon,
     color: '#5d4037'
   },
+  {
+    id: 'odometro',
+    name: 'Odômetro',
+    icon: SpeedIcon,
+    color: '#00796b'
+  },
 ]
 
 function Categories() {
@@ -67,6 +89,7 @@ function Categories() {
   const [isSaving, setIsSaving] = useState(false)
   const sigCanvas = useRef<SignatureCanvas>(null)
   const [checklistData, setChecklistData] = useState<Record<string, any>>({})
+  const { startTimer } = useTimer()
   const [formData, setFormData] = useState<InspectionFormData>({
     motorista: '',
     placaCavalo: '',
@@ -77,6 +100,10 @@ function Categories() {
     rota: '',
     data: ''
   })
+
+  useEffect(() => {
+    startTimer() // Inicia o cronômetro quando a página é carregada
+  }, [])
 
   useEffect(() => {
     // Carrega os dados do formulário e checklist do localStorage
@@ -179,10 +206,56 @@ function Categories() {
     })
   }
 
+  const handleAutoFill = () => {
+    // Preencher dados do formulário
+    const mockFormData = {
+      motorista: 'Motorista Teste',
+      placaCavalo: 'ABC1234',
+      placaCarreta: 'XYZ5678',
+      tipoVeiculo: 'Carreta',
+      dataEmissao: new Date().toISOString().split('T')[0],
+      observacoes: 'Observações de teste geradas automaticamente',
+      rota: 'Rota de Teste',
+      data: new Date().toISOString().split('T')[0]
+    }
+    setFormData(mockFormData)
+    localStorage.setItem(`checklistForm_${truckId}`, JSON.stringify(mockFormData))
+
+    // Preencher dados do checklist para cada categoria
+    const mockChecklistData: Record<string, any> = {}
+    categories.forEach(category => {
+      const items = Array(10).fill(null).map((_, index) => ({
+        id: index + 1,
+        title: `Item ${index + 1} da categoria ${category.name}`,
+        status: Math.random() > 0.2 ? 'valid' : 'invalid',
+        observation: `Observação de teste para item ${index + 1} gerada em ${new Date().toLocaleString()}`,
+        photos: []
+      }))
+      mockChecklistData[category.id] = items
+      localStorage.setItem(`checklist_${truckId}_${category.id}`, JSON.stringify(items))
+    })
+    setChecklistData(mockChecklistData)
+  }
+
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, px: 2 }}>
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h5" gutterBottom>
+    <Box sx={{ maxWidth: 800, mx: 'auto', mt: { xs: 0, sm: 4 }, px: 2 }}>
+      <InspectionTimer />
+      <Paper sx={{ p: 3, position: 'relative' }}>
+        <IconButton 
+          onClick={handleAutoFill}
+          sx={{ 
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            opacity: 0.3,
+            '&:hover': { opacity: 1 }
+          }}
+          title="Preencher automaticamente (teste)"
+        >
+          <BugReportIcon />
+        </IconButton>
+
+        <Typography variant="h5" gutterBottom sx={{ mt: 1 }}>
           Categorias de Inspeção
         </Typography>
         <Grid container spacing={3} justifyContent="center">
