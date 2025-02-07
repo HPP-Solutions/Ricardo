@@ -20,7 +20,6 @@ import {
   InputAdornment
 } from '@mui/material'
 import { PhotoCamera as CameraIcon, ArrowBack as BackIcon, BugReport as BugReportIcon, Close as CloseIcon } from '@mui/icons-material'
-import { InspectionTimer } from '../components/InspectionTimer'
 
 interface ChecklistItem {
   id: number
@@ -227,7 +226,6 @@ function Checklist() {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: { xs: 0, sm: 4 }, px: 2 }}>
-      <InspectionTimer showAlert={false} />
       <Paper sx={{ p: 3, position: 'relative' }}>
         <IconButton 
           onClick={handleAutoFill}

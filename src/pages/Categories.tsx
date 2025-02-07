@@ -19,12 +19,9 @@ import {
   SettingsSuggest as SettingsSuggestIcon,
   TireRepair as TireRepairIcon,
   BugReport as BugReportIcon,
-  Timer as TimerIcon,
   Speed as SpeedIcon
 } from '@mui/icons-material'
 import { inspectionService } from '../services/inspectionService'
-import { InspectionTimer } from '../components/InspectionTimer'
-import { useTimer } from '../contexts/TimerContext'
 
 interface InspectionFormData {
   motorista: string
@@ -89,7 +86,6 @@ function Categories() {
   const [isSaving, setIsSaving] = useState(false)
   const sigCanvas = useRef<SignatureCanvas>(null)
   const [checklistData, setChecklistData] = useState<Record<string, any>>({})
-  const { startTimer } = useTimer()
   const [formData, setFormData] = useState<InspectionFormData>({
     motorista: '',
     placaCavalo: '',
@@ -100,10 +96,6 @@ function Categories() {
     rota: '',
     data: ''
   })
-
-  useEffect(() => {
-    startTimer() // Inicia o cronômetro quando a página é carregada
-  }, [])
 
   useEffect(() => {
     // Carrega os dados do formulário e checklist do localStorage
@@ -152,6 +144,7 @@ function Categories() {
         if (result.success) {
           // Limpa os dados do localStorage após salvar com sucesso
           localStorage.removeItem(`checklistForm_${truckId}`)
+          localStorage.removeItem('inspection_timer')
           categories.forEach(category => {
             localStorage.removeItem(`checklist_${truckId}_${category.id}`)
           })
@@ -239,7 +232,6 @@ function Categories() {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: { xs: 0, sm: 4 }, px: 2 }}>
-      <InspectionTimer />
       <Paper sx={{ p: 3, position: 'relative' }}>
         <IconButton 
           onClick={handleAutoFill}
