@@ -87,6 +87,9 @@ function ChecklistForm() {
 
       if (inspectionError) throw inspectionError
 
+      // Inicia o cronômetro com 10 minutos
+      localStorage.setItem('inspection_timer', '600')
+
       // Salva os dados atuais antes de navegar
       localStorage.setItem(`checklistForm_${truck.id}`, JSON.stringify(formData))
       navigate(`/categories/${truck.id}`)

@@ -19,7 +19,8 @@ import {
   SettingsSuggest as SettingsSuggestIcon,
   TireRepair as TireRepairIcon,
   BugReport as BugReportIcon,
-  Speed as SpeedIcon
+  Speed as SpeedIcon,
+  Timer as TimerIcon
 } from '@mui/icons-material'
 import { inspectionService } from '../services/inspectionService'
 
@@ -86,6 +87,8 @@ function Categories() {
   const [isSaving, setIsSaving] = useState(false)
   const sigCanvas = useRef<SignatureCanvas>(null)
   const [checklistData, setChecklistData] = useState<Record<string, any>>({})
+  const [timeLeft, setTimeLeft] = useState<number>(600) // 10 minutos em segundos
+  const [isOvertime, setIsOvertime] = useState<boolean>(false)
   const [formData, setFormData] = useState<InspectionFormData>({
     motorista: '',
     placaCavalo: '',
@@ -96,6 +99,33 @@ function Categories() {
     rota: '',
     data: ''
   })
+
+  // Efeito para iniciar o cronômetro
+  useEffect(() => {
+    const savedTime = localStorage.getItem('inspection_timer')
+    if (savedTime) {
+      const parsedTime = parseInt(savedTime)
+      setTimeLeft(parsedTime)
+      if (parsedTime <= 0) {
+        setIsOvertime(true)
+      }
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        const newTime = prevTime - 1
+        localStorage.setItem('inspection_timer', newTime.toString())
+        
+        if (newTime <= 0 && !isOvertime) {
+          setIsOvertime(true)
+        }
+        
+        return newTime
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     // Carrega os dados do formulário e checklist do localStorage
@@ -144,10 +174,15 @@ function Categories() {
         if (result.success) {
           // Limpa os dados do localStorage após salvar com sucesso
           localStorage.removeItem(`checklistForm_${truckId}`)
-          localStorage.removeItem('inspection_timer')
+          localStorage.removeItem('inspection_timer') // Remove o timer atual
           categories.forEach(category => {
             localStorage.removeItem(`checklist_${truckId}_${category.id}`)
           })
+
+          // Reinicia o timer para 10 minutos
+          localStorage.setItem('inspection_timer', '600')
+          setTimeLeft(600)
+          setIsOvertime(false)
 
           navigate('/')
         } else {
@@ -230,9 +265,39 @@ function Categories() {
     setChecklistData(mockChecklistData)
   }
 
+  const formatTime = (seconds: number): string => {
+    const absSeconds = Math.abs(seconds)
+    const minutes = Math.floor(absSeconds / 60)
+    const remainingSeconds = absSeconds % 60
+    const sign = seconds < 0 ? '-' : ''
+    return `${sign}${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: { xs: 0, sm: 4 }, px: 2 }}>
       <Paper sx={{ p: 3, position: 'relative' }}>
+        {/* Timer Display */}
+        <Box sx={{ 
+          position: 'absolute',
+          top: 8,
+          left: 8,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          color: isOvertime ? 'error.main' : 'primary.main'
+        }}>
+          <TimerIcon />
+          <Typography variant="subtitle1">
+            {formatTime(timeLeft)}
+          </Typography>
+        </Box>
+
+        {isOvertime && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            Atenção: O tempo recomendado para a vistoria foi excedido!
+          </Alert>
+        )}
+
         <IconButton 
           onClick={handleAutoFill}
           sx={{ 
